@@ -1,26 +1,396 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Gray scale */
+  --c1: oklch(0.162 0 0);
+  --c2: oklch(0.195 0 0);
+  --c3: oklch(0.254 0 0);
+  --c4: oklch(0.302 0 0);
+  --c5: oklch(0.348 0 0);
+  --c6: oklch(0.396 0 0);
+  --c7: oklch(0.459 0 0);
+  --c8: oklch(0.549 0 0);
+  --c9: oklch(0.649 0 0);
+  --c10: oklch(0.72 0 0);
+  --c11: oklch(0.863 0 0);
+  --c12: oklch(0.933 0 0);
+
+  /* Semantic */
+  --background: var(--c1);
+  --foreground: var(--c12);
+  --card: var(--c2);
+  --card-elevated: var(--c3);
+  --border: var(--c3);
+  --border-hover: var(--c4);
+  --accent: #3b82f6;
+  --accent-hover: #2563eb;
+  --success: #22c55e;
+  --warning: #eab308;
+  --error: #ef4444;
+  --muted: var(--c7);
+  --muted-border: var(--c3);
+  --text-secondary: var(--c9);
+  --protocol-accent: oklch(0.72 0.15 155);
 }
 
 @theme inline {
+  /* Gray scale — oklch tokens */
+  --color-c1: var(--c1);
+  --color-c2: var(--c2);
+  --color-c3: var(--c3);
+  --color-c4: var(--c4);
+  --color-c5: var(--c5);
+  --color-c6: var(--c6);
+  --color-c7: var(--c7);
+  --color-c8: var(--c8);
+  --color-c9: var(--c9);
+  --color-c10: var(--c10);
+  --color-c11: var(--c11);
+  --color-c12: var(--c12);
+
+  /* Remap zinc to oklch — makes ALL existing components consistent */
+  --color-zinc-950: var(--c1);
+  --color-zinc-900: var(--c2);
+  --color-zinc-800: var(--c3);
+  --color-zinc-700: var(--c5);
+  --color-zinc-600: var(--c6);
+  --color-zinc-500: var(--c7);
+  --color-zinc-400: var(--c8);
+  --color-zinc-300: var(--c9);
+  --color-zinc-200: var(--c10);
+  --color-zinc-100: var(--c11);
+  --color-zinc-50: var(--c12);
+
+  /* Semantic */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-elevated: var(--card-elevated);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-muted: var(--muted);
+  --color-muted-border: var(--muted-border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-pixel: var(--font-geist-pixel-square);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  overflow: hidden;
+  height: 100%;
+  overscroll-behavior: none;
 }
 
 body {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: none;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+/* Slanted line section divider */
+.section-hatch {
+  height: 40px;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 4px,
+    var(--c2) 4px,
+    var(--c2) 5px
+  );
+}
+
+
+
+/* Flowing pulse through borders — comet trail with glow */
+.flow-line {
+  position: relative;
+  overflow: hidden;
+  contain: paint;
+}
+
+.flow-line-v {
+  contain: paint;
+}
+
+/* Horizontal pulse — comet tail, wider segment, color-shifted */
+.flow-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -70px;
+  height: 1px;
+  width: 70px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    color-mix(in oklch, var(--flow-color, var(--c7)) 15%, transparent) 12%,
+    color-mix(in oklch, var(--flow-color, var(--c7)) 50%, transparent) 35%,
+    var(--flow-color, var(--c7)) 70%,
+    color-mix(in oklch, var(--flow-color, var(--c7)), white 25%) 88%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  animation: flow-h var(--flow-total, 20s) linear infinite;
+  animation-delay: var(--flow-delay, 0s);
+}
+
+/* Vertical pulse — comet tail, wider segment, color-shifted */
+.flow-line-v::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: -70px;
+  width: 1px;
+  height: 70px;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    color-mix(in oklch, var(--flow-color, var(--c7)) 15%, transparent) 12%,
+    color-mix(in oklch, var(--flow-color, var(--c7)) 50%, transparent) 35%,
+    var(--flow-color, var(--c7)) 70%,
+    color-mix(in oklch, var(--flow-color, var(--c7)), white 25%) 88%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  animation: flow-v var(--flow-total, 20s) linear infinite;
+  animation-delay: var(--flow-delay, 0s);
+}
+
+/* Protocol architecture diagram */
+.protocol-node {
+  opacity: 0;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+
+.protocol-node.is-visible {
+  opacity: 1;
+  clip-path: inset(0 0 0 0);
+}
+
+.protocol-line-h {
+  opacity: 0;
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+
+.protocol-line-v {
+  opacity: 0;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
+}
+
+.protocol-line-h.is-visible,
+.protocol-line-v.is-visible {
+  opacity: 1;
+  clip-path: inset(0 0 0 0);
+}
+
+@keyframes protocol-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.protocol-status-dot {
+  color: var(--protocol-accent);
+  animation: protocol-blink 1.2s step-end infinite;
+}
+
+/* Protocol stack — bottom-to-top layer fade */
+.stack-layer {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stack-layer.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Protocol stack — right-side layer descriptions */
+.stack-desc {
+  opacity: 0;
+  transform: translateX(12px);
+  transition:
+    opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.stack-desc.is-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Icon morph — looping stroke draw */
+.icon-morph path,
+.icon-morph line,
+.icon-morph circle,
+.icon-morph polyline,
+.icon-morph rect {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: morph-draw 3.5s ease-in-out infinite;
+}
+
+@keyframes morph-draw {
+  0% { stroke-dashoffset: 100; }
+  20% { stroke-dashoffset: 0; }
+  80% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 100; }
+}
+
+/* Eye blink animation */
+.icon-blink {
+  animation: eye-blink 4.5s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes eye-blink {
+  0%, 42%, 50%, 100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  45%, 47% {
+    transform: scaleY(0.1);
+    opacity: 0.6;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Selection */
+::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: #ffffff;
+}
+
+/* Tabular numbers for data */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Dot grid background pattern */
+.dot-grid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Construction grid — fine line grid with dot intersections */
+.construction-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    radial-gradient(rgba(255, 255, 255, 0.03) 0.5px, transparent 0.5px);
+  background-size:
+    60px 60px,
+    60px 60px,
+    60px 60px;
+  background-position:
+    0 0,
+    0 0,
+    30px 30px;
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Gradient orb animation for hero */
+@keyframes float {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(30px, -30px) scale(1.05);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.95);
+  }
+}
+
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+/* Skeleton pulse */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 0.05;
+  }
+  50% {
+    opacity: 0.15;
+  }
+}
+
+.animate-skeleton {
+  animation: skeleton-pulse 2s ease-in-out infinite;
+}
+
+/* Modal backdrop */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
 }
