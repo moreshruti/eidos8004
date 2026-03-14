@@ -1,10 +1,10 @@
-export type SupportedChainId = 31337 | 80002;
+export type SupportedChainId = 31337 | 80002 | 84532;
 
 interface ContractAddresses {
-  designNFT: string;
+  designRegistry: string;
   agentRegistry: string;
-  attributionValidator: string;
-  royaltyDistribution: string;
+  attributionPayment: string;
+  reputationForum: string;
 }
 
 interface ChainConfig {
@@ -26,25 +26,41 @@ export const SUPPORTED_CHAINS: Record<SupportedChainId, ChainConfig> = {
     name: 'Hardhat Local',
     rpcUrl: 'http://127.0.0.1:8545',
     contracts: {
-      designNFT: process.env.NEXT_PUBLIC_DESIGN_NFT_ADDRESS || ZERO_ADDRESS,
+      designRegistry: process.env.NEXT_PUBLIC_DESIGN_REGISTRY_ADDRESS || ZERO_ADDRESS,
       agentRegistry: process.env.NEXT_PUBLIC_AGENT_REGISTRY_ADDRESS || ZERO_ADDRESS,
-      attributionValidator: process.env.NEXT_PUBLIC_ATTRIBUTION_ADDRESS || ZERO_ADDRESS,
-      royaltyDistribution: process.env.NEXT_PUBLIC_ROYALTY_ADDRESS || ZERO_ADDRESS,
+      attributionPayment: process.env.NEXT_PUBLIC_ATTRIBUTION_PAYMENT_ADDRESS || ZERO_ADDRESS,
+      reputationForum: process.env.NEXT_PUBLIC_REPUTATION_FORUM_ADDRESS || ZERO_ADDRESS,
     },
   },
   80002: {
     name: 'Polygon Amoy',
     rpcUrl: process.env.NEXT_PUBLIC_AMOY_RPC_URL || 'https://rpc-amoy.polygon.technology',
     contracts: {
-      designNFT: process.env.NEXT_PUBLIC_DESIGN_NFT_ADDRESS || ZERO_ADDRESS,
+      designRegistry: process.env.NEXT_PUBLIC_DESIGN_REGISTRY_ADDRESS || ZERO_ADDRESS,
       agentRegistry: process.env.NEXT_PUBLIC_AGENT_REGISTRY_ADDRESS || ZERO_ADDRESS,
-      attributionValidator: process.env.NEXT_PUBLIC_ATTRIBUTION_ADDRESS || ZERO_ADDRESS,
-      royaltyDistribution: process.env.NEXT_PUBLIC_ROYALTY_ADDRESS || ZERO_ADDRESS,
+      attributionPayment: process.env.NEXT_PUBLIC_ATTRIBUTION_PAYMENT_ADDRESS || ZERO_ADDRESS,
+      reputationForum: process.env.NEXT_PUBLIC_REPUTATION_FORUM_ADDRESS || ZERO_ADDRESS,
     },
     blockExplorerUrl: 'https://amoy.polygonscan.com',
     nativeCurrency: {
       name: 'POL',
       symbol: 'POL',
+      decimals: 18,
+    },
+  },
+  84532: {
+    name: 'Base Sepolia',
+    rpcUrl: process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC_URL || 'https://sepolia.base.org',
+    contracts: {
+      designRegistry: process.env.NEXT_PUBLIC_DESIGN_REGISTRY_ADDRESS || ZERO_ADDRESS,
+      agentRegistry: process.env.NEXT_PUBLIC_AGENT_REGISTRY_ADDRESS || ZERO_ADDRESS,
+      attributionPayment: process.env.NEXT_PUBLIC_ATTRIBUTION_PAYMENT_ADDRESS || ZERO_ADDRESS,
+      reputationForum: process.env.NEXT_PUBLIC_REPUTATION_FORUM_ADDRESS || ZERO_ADDRESS,
+    },
+    blockExplorerUrl: 'https://sepolia.basescan.org',
+    nativeCurrency: {
+      name: 'ETH',
+      symbol: 'ETH',
       decimals: 18,
     },
   },

@@ -3,8 +3,8 @@
 import { useState, useCallback } from 'react';
 import { ethers } from 'ethers';
 import { useWeb3 } from '@/context/Web3Context';
-import { getDesignNFTContract } from '@/lib/contracts';
-import type { DesignMetadata } from '@/lib/types';
+import { getDesignRegistryContract } from '@/lib/contracts';
+import type { DesignMetadata, Artifact } from '@/lib/types';
 
 export function useDesignNFT() {
   const { signer, provider, chainId } = useWeb3();
@@ -14,11 +14,10 @@ export function useDesignNFT() {
   const mintDesign = useCallback(
     async (
       title: string,
+      description: string,
       category: string,
+      ipfsCid: string,
       tags: string[],
-      baseRoyaltyBps: number,
-      isPublic: boolean,
-      ipfsHash: string,
       tokenURI: string,
     ): Promise<number> => {
       if (!signer || !chainId) {
@@ -29,14 +28,13 @@ export function useDesignNFT() {
       setError(null);
 
       try {
-        const contract = getDesignNFTContract(signer, chainId);
+        const contract = getDesignRegistryContract(signer, chainId);
         const tx = await contract.mintDesign(
           title,
+          description,
           category,
+          ipfsCid,
           tags,
-          baseRoyaltyBps,
-          isPublic,
-          ipfsHash,
           tokenURI,
         );
         const receipt = await tx.wait();
@@ -85,7 +83,7 @@ export function useDesignNFT() {
       setError(null);
 
       try {
-        const contract = getDesignNFTContract(provider, chainId);
+        const contract = getDesignRegistryContract(provider, chainId);
         const [design, uri] = await Promise.all([
           contract.getDesign(tokenId),
           contract.tokenURI(tokenId),
@@ -93,14 +91,15 @@ export function useDesignNFT() {
 
         return {
           tokenId,
+          artist: design.artist,
           title: design.title,
+          description: design.description,
           category: design.category,
-          tags: design.tags as string[],
-          baseRoyaltyBps: Number(design.baseRoyaltyBps),
-          isPublic: design.isPublic,
-          ipfsHash: design.ipfsHash,
-          creator: design.creator,
+          ipfsCid: design.ipfsCid,
+          tags: [...design.tags],
+          thresholdPrice: design.thresholdPrice,
           createdAt: Number(design.createdAt),
+          isPublic: design.isPublic,
           tokenURI: uri as string,
         };
       } catch (err) {
@@ -116,7 +115,7 @@ export function useDesignNFT() {
   );
 
   const getDesignerPortfolio = useCallback(
-    async (designerAddress: string): Promise<number[]> => {
+    async (address: string): Promise<number[]> => {
       if (!provider || !chainId) {
         throw new Error('Provider not available');
       }
@@ -125,11 +124,9 @@ export function useDesignNFT() {
       setError(null);
 
       try {
-        const contract = getDesignNFTContract(provider, chainId);
-        const tokenIds: bigint[] = await contract.getDesignerPortfolio(
-          designerAddress,
-        );
-        return tokenIds.map(Number);
+        const contract = getDesignRegistryContract(provider, chainId);
+        const ids: bigint[] = await contract.getArtistDesigns(address);
+        return ids.map(Number);
       } catch (err) {
         const message =
           err instanceof Error
@@ -153,7 +150,7 @@ export function useDesignNFT() {
     setError(null);
 
     try {
-      const contract = getDesignNFTContract(provider, chainId);
+      const contract = getDesignRegistryContract(provider, chainId);
       const total: bigint = await contract.totalDesigns();
       return Number(total);
     } catch (err) {
@@ -168,12 +165,12 @@ export function useDesignNFT() {
     }
   }, [provider, chainId]);
 
-  const updateDesignMetadata = useCallback(
+  const addArtifact = useCallback(
     async (
-      tokenId: number,
-      title: string,
-      category: string,
-      isPublic: boolean,
+      designId: number,
+      name: string,
+      description: string,
+      priceInWei: bigint,
     ): Promise<void> => {
       if (!signer || !chainId) {
         throw new Error('Wallet not connected');
@@ -183,19 +180,17 @@ export function useDesignNFT() {
       setError(null);
 
       try {
-        const contract = getDesignNFTContract(signer, chainId);
-        const tx = await contract.updateDesignMetadata(
-          tokenId,
-          title,
-          category,
-          isPublic,
+        const contract = getDesignRegistryContract(signer, chainId);
+        const tx = await contract.addArtifact(
+          designId,
+          name,
+          description,
+          priceInWei,
         );
         await tx.wait();
       } catch (err) {
         const message =
-          err instanceof Error
-            ? err.message
-            : 'Failed to update design metadata';
+          err instanceof Error ? err.message : 'Failed to add artifact';
         setError(message);
         throw err;
       } finally {
@@ -205,12 +200,71 @@ export function useDesignNFT() {
     [signer, chainId],
   );
 
+  const getDesignArtifacts = useCallback(
+    async (designId: number): Promise<Artifact[]> => {
+      if (!provider || !chainId) {
+        throw new Error('Provider not available');
+      }
+
+      setLoading(true);
+      setError(null);
+
+      try {
+        const contract = getDesignRegistryContract(provider, chainId);
+        const artifacts = await contract.getDesignArtifacts(designId);
+        return artifacts.map((a: Record<string, unknown>) => ({
+          name: a.name as string,
+          description: a.description as string,
+          priceInWei: a.priceInWei as bigint,
+          active: a.active as boolean,
+        }));
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'Failed to fetch design artifacts';
+        setError(message);
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [provider, chainId],
+  );
+
+  const calculateArtifactsCost = useCallback(
+    async (designId: number, artifactIds: number[]): Promise<bigint> => {
+      if (!provider || !chainId) {
+        throw new Error('Provider not available');
+      }
+
+      try {
+        const contract = getDesignRegistryContract(provider, chainId);
+        const cost: bigint = await contract.calculateArtifactsCost(
+          designId,
+          artifactIds,
+        );
+        return cost;
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'Failed to calculate artifacts cost';
+        setError(message);
+        throw err;
+      }
+    },
+    [provider, chainId],
+  );
+
   return {
     mintDesign,
     getDesign,
     getDesignerPortfolio,
     totalDesigns,
-    updateDesignMetadata,
+    addArtifact,
+    getDesignArtifacts,
+    calculateArtifactsCost,
     loading,
     error,
   };

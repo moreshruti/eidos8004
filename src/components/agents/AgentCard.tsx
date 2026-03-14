@@ -6,6 +6,7 @@ import type { Agent, Attribution } from '@/lib/types'
 import { useWeb3 } from '@/context/Web3Context'
 import { useAttributionValidator } from '@/hooks/useAttributionValidator'
 import TrustScoreBadge from './TrustScoreBadge'
+import { AgentType } from '@/lib/types'
 
 interface AgentCardProps {
   agent: Agent
@@ -23,7 +24,7 @@ export default function AgentCard({ agent }: AgentCardProps) {
 
     async function fetchAttributions() {
       try {
-        const result = await getAttributionsByAgent(agent.address)
+        const result = await getAttributionsByAgent(agent.wallet)
         if (!cancelled) setAttributions(result)
       } catch {
         // Silently fail for card-level attribution fetch
@@ -33,15 +34,15 @@ export default function AgentCard({ agent }: AgentCardProps) {
     fetchAttributions()
     return () => { cancelled = true }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [chainId, agent.address])
+  }, [chainId, agent.wallet])
 
-  const totalPaid = attributions.reduce(
-    (sum, a) => sum + parseFloat(a.royaltyAmount),
+  const totalPaidAmount = attributions.reduce(
+    (sum, a) => sum + parseFloat(a.totalPaid),
     0
   )
 
   return (
-    <Link href={`/agents/${agent.address}`}>
+    <Link href={`/agents/${agent.agentId}`}>
       <div className="group bg-c1 p-5 hover:bg-c2 transition-colors duration-150 cursor-pointer h-full flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
@@ -56,17 +57,17 @@ export default function AgentCard({ agent }: AgentCardProps) {
                 <h3 className="text-sm font-medium text-c11 truncate">
                   {agent.name}
                 </h3>
-                {agent.isActive && (
+                {agent.active && (
                   <span className="w-1.5 h-1.5 bg-emerald-400 shrink-0" />
                 )}
               </div>
               <p className="text-[10px] text-c5 font-mono uppercase tracking-[0.2em]">
-                {agent.capabilities.length} capabilities
+                {agent.agentType === AgentType.CLIENT ? 'Client' : 'Artist'}
               </p>
             </div>
           </div>
           <div className="relative shrink-0">
-            <TrustScoreBadge score={agent.trustScore} size="sm" />
+            <TrustScoreBadge score={agent.reputationScore ?? 0} size="sm" />
           </div>
         </div>
 
@@ -77,14 +78,13 @@ export default function AgentCard({ agent }: AgentCardProps) {
 
         {/* Capabilities */}
         <div className="flex flex-wrap gap-1.5 mb-4">
-          {agent.capabilities.map((cap) => (
+          {agent.capabilitiesURI && (
             <span
-              key={cap}
               className="border border-c3 text-c7 text-[11px] px-1.5 py-0.5 font-mono"
             >
-              {cap}
+              View capabilities
             </span>
-          ))}
+          )}
         </div>
 
         {/* Stats */}
@@ -92,7 +92,7 @@ export default function AgentCard({ agent }: AgentCardProps) {
           <span>
             {attributions.length} attributions
           </span>
-          <span>{totalPaid.toFixed(2)} ETH paid</span>
+          <span>{totalPaidAmount.toFixed(2)} ETH paid</span>
         </div>
 
         {/* View Details */}

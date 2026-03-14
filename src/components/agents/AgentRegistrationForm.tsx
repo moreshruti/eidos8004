@@ -7,32 +7,16 @@ import { useWeb3 } from '@/context/Web3Context'
 import { useAgentRegistry } from '@/hooks/useAgentRegistry'
 import { withTxToast } from '@/lib/tx-toast'
 import { WalletGate } from '@/components/ui/WalletGate'
+import { AgentType } from '@/lib/types'
 
 interface FormState {
+  agentType: AgentType
   name: string
   description: string
-  capabilities: string[]
-  agentCardURI: string
+  capabilitiesURI: string
+  tokenURI: string
   termsAccepted: boolean
 }
-
-const CAPABILITY_OPTIONS = [
-  {
-    value: 'design-inspiration',
-    label: 'Design Inspiration',
-    description: 'Uses designs as creative reference',
-  },
-  {
-    value: 'direct-usage',
-    label: 'Direct Usage',
-    description: 'Directly incorporates design elements',
-  },
-  {
-    value: 'ai-training',
-    label: 'AI Training',
-    description: 'Uses designs for model training data',
-  },
-]
 
 export default function AgentRegistrationForm() {
   const router = useRouter()
@@ -40,10 +24,11 @@ export default function AgentRegistrationForm() {
   const { registerAgent } = useAgentRegistry()
 
   const [form, setForm] = useState<FormState>({
+    agentType: AgentType.CLIENT,
     name: '',
     description: '',
-    capabilities: [],
-    agentCardURI: '',
+    capabilitiesURI: '',
+    tokenURI: '',
     termsAccepted: false,
   })
 
@@ -51,23 +36,14 @@ export default function AgentRegistrationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
 
-  const toggleCapability = (value: string) => {
-    setForm((prev) => ({
-      ...prev,
-      capabilities: prev.capabilities.includes(value)
-        ? prev.capabilities.filter((c) => c !== value)
-        : [...prev.capabilities, value],
-    }))
-  }
-
   const validate = (): boolean => {
     const newErrors: Partial<Record<keyof FormState, string>> = {}
 
     if (!form.name.trim()) {
       newErrors.name = 'Agent name is required'
     }
-    if (form.capabilities.length === 0) {
-      newErrors.capabilities = 'Select at least one capability'
+    if (!form.capabilitiesURI.trim()) {
+      newErrors.capabilitiesURI = 'Capabilities URI is required'
     }
     if (!form.termsAccepted) {
       newErrors.termsAccepted = 'You must accept the terms'
@@ -85,10 +61,11 @@ export default function AgentRegistrationForm() {
     try {
       await withTxToast(
         registerAgent(
+          form.agentType,
           form.name,
           form.description,
-          form.capabilities,
-          form.agentCardURI
+          form.capabilitiesURI,
+          form.tokenURI,
         ),
         {
           pending: 'Registering agent on-chain...',
@@ -137,6 +114,39 @@ export default function AgentRegistrationForm() {
   return (
     <WalletGate message="Connect your wallet to register an AI agent">
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Agent Type */}
+        <div>
+          <label className="block text-c7 font-mono uppercase tracking-[0.2em] text-[10px] mb-3">
+            Agent Type
+          </label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setForm((prev) => ({ ...prev, agentType: AgentType.CLIENT }))}
+              disabled={isSubmitting}
+              className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                form.agentType === AgentType.CLIENT
+                  ? 'bg-c2 border border-c5 text-c12'
+                  : 'border border-c3 text-c7 hover:text-c9 hover:border-c5'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              Client
+            </button>
+            <button
+              type="button"
+              onClick={() => setForm((prev) => ({ ...prev, agentType: AgentType.ARTIST }))}
+              disabled={isSubmitting}
+              className={`flex-1 py-2 text-sm font-medium transition-colors ${
+                form.agentType === AgentType.ARTIST
+                  ? 'bg-c2 border border-c5 text-c12'
+                  : 'border border-c3 text-c7 hover:text-c9 hover:border-c5'
+              } disabled:opacity-50 disabled:cursor-not-allowed`}
+            >
+              Artist
+            </button>
+          </div>
+        </div>
+
         {/* Agent Name */}
         <div>
           <label htmlFor="agent-name" className="block text-c7 font-mono uppercase tracking-[0.2em] text-[10px] mb-1.5">
@@ -174,73 +184,49 @@ export default function AgentRegistrationForm() {
           />
         </div>
 
-        {/* Capabilities */}
+        {/* Capabilities URI */}
         <div>
-          <label className="block text-c7 font-mono uppercase tracking-[0.2em] text-[10px] mb-3">
-            Capabilities
+          <label htmlFor="capabilities-uri" className="block text-c7 font-mono uppercase tracking-[0.2em] text-[10px] mb-1.5">
+            Capabilities URI
           </label>
-          <div className="space-y-3">
-            {CAPABILITY_OPTIONS.map((option) => (
-              <label
-                key={option.value}
-                className="flex items-start gap-3 cursor-pointer group"
-              >
-                <div className="pt-0.5">
-                  <div
-                    className={`w-5 h-5 border transition-colors flex items-center justify-center ${
-                      form.capabilities.includes(option.value)
-                        ? 'bg-c12 border-c12'
-                        : 'border-c3 bg-transparent group-hover:border-c5'
-                    }`}
-                    onClick={() => toggleCapability(option.value)}
-                  >
-                    {form.capabilities.includes(option.value) && (
-                      <svg
-                        className="w-3 h-3 text-c1"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={3}
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5 13l4 4L19 7"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                </div>
-                <div>
-                  <span className="text-sm text-c11">{option.label}</span>
-                  <p className="text-xs text-c5 mt-0.5">
-                    {option.description}
-                  </p>
-                </div>
-              </label>
-            ))}
-          </div>
-          {errors.capabilities && (
-            <p className="text-error text-xs mt-1">{errors.capabilities}</p>
+          <input
+            id="capabilities-uri"
+            type="text"
+            value={form.capabilitiesURI}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, capabilitiesURI: e.target.value }))
+            }
+            placeholder="ipfs://... or https://..."
+            disabled={isSubmitting}
+            className="w-full bg-c2 border border-c3 px-4 py-2.5 text-sm text-c11 placeholder:text-c5 focus:border-c5 focus:outline-none transition-colors font-mono disabled:bg-c1 disabled:border-c2 disabled:text-c5"
+          />
+          <p className="text-xs text-c5 mt-1">
+            URI pointing to your agent&apos;s capabilities document
+          </p>
+          {errors.capabilitiesURI && (
+            <p className="text-error text-xs mt-1">{errors.capabilitiesURI}</p>
           )}
         </div>
 
-        {/* Agent Card URI */}
+        {/* Token URI */}
         <div>
-          <label htmlFor="agent-card-uri" className="block text-c7 font-mono uppercase tracking-[0.2em] text-[10px] mb-1.5">
-            Agent Card URI
+          <label htmlFor="token-uri" className="block text-c7 font-mono uppercase tracking-[0.2em] text-[10px] mb-1.5">
+            Token URI
           </label>
           <input
-            id="agent-card-uri"
+            id="token-uri"
             type="text"
-            value={form.agentCardURI}
+            value={form.tokenURI}
             onChange={(e) =>
-              setForm((prev) => ({ ...prev, agentCardURI: e.target.value }))
+              setForm((prev) => ({ ...prev, tokenURI: e.target.value }))
             }
             placeholder="ipfs://..."
             disabled={isSubmitting}
             className="w-full bg-c2 border border-c3 px-4 py-2.5 text-sm text-c11 placeholder:text-c5 focus:border-c5 focus:outline-none transition-colors font-mono disabled:bg-c1 disabled:border-c2 disabled:text-c5"
           />
+          <p className="text-xs text-c5 mt-1">
+            URI for the agent NFT metadata (optional)
+          </p>
         </div>
 
         {/* Payment Wallet */}

@@ -14,7 +14,6 @@ import { useWeb3 } from '@/context/Web3Context'
 import { useAttributionValidator } from '@/hooks/useAttributionValidator'
 import { Skeleton } from '@/components/ui/Skeleton'
 import toast from 'react-hot-toast'
-import { ethers } from 'ethers'
 import { withMockFallback } from '@/lib/mock-fallback'
 import { mockAttributions } from '@/lib/mock-data'
 
@@ -70,12 +69,12 @@ export default function EarningsChart({ height = 300 }: EarningsChartProps) {
           mockAttributions
         )
 
-        // Group by month from timestamp, sum royaltyAmount per month
+        // Group by month from timestamp, sum totalPaid per month
         const monthlyMap = new Map<string, number>()
         for (const attr of attributions) {
           const date = new Date(attr.timestamp * 1000)
           const monthKey = `${date.toLocaleString('en-US', { month: 'short' })} ${date.getFullYear()}`
-          const amount = parseFloat(ethers.formatEther(attr.royaltyAmount))
+          const amount = parseFloat(attr.totalPaid)
           monthlyMap.set(monthKey, (monthlyMap.get(monthKey) || 0) + amount)
         }
 

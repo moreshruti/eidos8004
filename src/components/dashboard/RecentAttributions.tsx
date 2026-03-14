@@ -7,16 +7,9 @@ import { useDesignNFT } from '@/hooks/useDesignNFT'
 import { useAgentRegistry } from '@/hooks/useAgentRegistry'
 import { Skeleton } from '@/components/ui/Skeleton'
 import toast from 'react-hot-toast'
-import { ethers } from 'ethers'
 import type { Attribution } from '@/lib/types'
 import { withMockFallback } from '@/lib/mock-fallback'
 import { mockAttributions } from '@/lib/mock-data'
-
-const usageTypeLabels: Record<string, string> = {
-  inspiration: 'Inspiration',
-  direct_usage: 'Direct Use',
-  training: 'Training',
-}
 
 function formatRelativeTime(timestamp: number): string {
   const ms = timestamp < 1e12 ? timestamp * 1000 : timestamp
@@ -38,7 +31,7 @@ export default function RecentAttributions() {
   const { address, isConnected, chainId } = useWeb3()
   const { getAttributionsByDesigner } = useAttributionValidator()
   const { getDesign } = useDesignNFT()
-  const { getAgent } = useAgentRegistry()
+  const { getAgentByWallet } = useAgentRegistry()
 
   const [attributions, setAttributions] = useState<Attribution[]>([])
   const [agentNames, setAgentNames] = useState<Map<string, string>>(new Map())
@@ -66,12 +59,12 @@ export default function RecentAttributions() {
         setAttributions(sorted)
 
         // Resolve unique agent names
-        const uniqueAgents = Array.from(new Set(sorted.map((a) => a.agentAddress)))
+        const uniqueAgents = Array.from(new Set(sorted.map((a) => a.clientAgent)))
         const agentMap = new Map<string, string>()
         await Promise.all(
           uniqueAgents.map(async (agentAddr) => {
             try {
-              const agent = await getAgent(agentAddr)
+              const agent = await getAgentByWallet(agentAddr)
               agentMap.set(agentAddr, agent.name)
             } catch {
               agentMap.set(agentAddr, `${agentAddr.slice(0, 6)}...${agentAddr.slice(-4)}`)
@@ -112,7 +105,7 @@ export default function RecentAttributions() {
     return () => {
       cancelled = true
     }
-  }, [address, chainId, isConnected, getAttributionsByDesigner, getDesign, getAgent])
+  }, [address, chainId, isConnected, getAttributionsByDesigner, getDesign, getAgentByWallet])
 
   if (loading) {
     return (
@@ -159,7 +152,6 @@ export default function RecentAttributions() {
               <tr className="text-c6 font-mono text-[10px] uppercase tracking-[0.15em]">
                 <th className="text-left px-6 py-3 font-medium">Agent</th>
                 <th className="text-left px-6 py-3 font-medium hidden sm:table-cell">Design</th>
-                <th className="text-left px-6 py-3 font-medium">Type</th>
                 <th className="text-right px-6 py-3 font-medium">Amount</th>
                 <th className="text-right px-6 py-3 font-medium hidden md:table-cell">Date</th>
               </tr>
@@ -167,13 +159,10 @@ export default function RecentAttributions() {
             <tbody>
               {attributions.map((attr) => {
                 const agentName =
-                  agentNames.get(attr.agentAddress) ||
-                  `${attr.agentAddress.slice(0, 6)}...${attr.agentAddress.slice(-4)}`
+                  agentNames.get(attr.clientAgent) ||
+                  `${attr.clientAgent.slice(0, 6)}...${attr.clientAgent.slice(-4)}`
                 const designTitle =
                   designTitles.get(attr.designId) || `Design #${attr.designId}`
-                const formattedAmount = parseFloat(
-                  ethers.formatEther(attr.royaltyAmount)
-                ).toFixed(4)
 
                 return (
                   <tr
@@ -191,13 +180,8 @@ export default function RecentAttributions() {
                     <td className="px-6 py-3 text-c7 hidden sm:table-cell whitespace-nowrap max-w-[160px] truncate">
                       {designTitle}
                     </td>
-                    <td className="px-6 py-3">
-                      <span className="inline-flex items-center border border-c3 text-c7 text-[10px] font-mono uppercase px-2 py-0.5">
-                        {usageTypeLabels[attr.usageType] || attr.usageType}
-                      </span>
-                    </td>
                     <td className="px-6 py-3 text-right text-c12 font-mono tabular-nums whitespace-nowrap">
-                      {formattedAmount} ETH
+                      {attr.totalPaid} ETH
                     </td>
                     <td className="px-6 py-3 text-right text-c6 hidden md:table-cell whitespace-nowrap">
                       {formatRelativeTime(attr.timestamp)}

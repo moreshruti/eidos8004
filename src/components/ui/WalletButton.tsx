@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import { useWeb3 } from '@/context/Web3Context';
 import { Button } from './Button';
 import { Wallet } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 interface WalletButtonProps {
   className?: string;
@@ -21,19 +23,39 @@ function formatBalance(balance: string): string {
 
 function WalletButton({ className = '' }: WalletButtonProps) {
   const { isConnected, address, balance, connectWallet, disconnectWallet } = useWeb3();
+  const [connecting, setConnecting] = useState(false);
+
+  const handleConnect = async () => {
+    if (typeof window !== 'undefined' && !window.ethereum) {
+      toast.error('No wallet detected. Install MetaMask to continue.');
+      window.open('https://metamask.io/download/', '_blank');
+      return;
+    }
+    setConnecting(true);
+    try {
+      await connectWallet();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to connect wallet';
+      if (!message.includes('rejected')) {
+        toast.error(message);
+      }
+    } finally {
+      setConnecting(false);
+    }
+  };
 
   if (isConnected && address) {
     return (
       <div className={`flex items-center gap-2 ${className}`.trim()}>
-        <span className="hidden sm:block text-xs text-zinc-500 font-mono tabular-nums">
+        <span className="hidden sm:block text-xs text-c5 font-mono tabular-nums">
           {formatBalance(balance)}
         </span>
         <button
           onClick={disconnectWallet}
-          className="inline-flex items-center gap-2 h-8 px-3 bg-zinc-900 border border-zinc-700/50 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06),inset_0_-1px_0_0_rgba(0,0,0,0.3),0_1px_2px_0_rgba(0,0,0,0.5)] transition-all duration-100 hover:bg-zinc-800 active:bg-zinc-950 active:shadow-[inset_0_2px_4px_0_rgba(0,0,0,0.4)]"
+          className="inline-flex items-center gap-2 h-8 px-3 bg-c2 border border-c3 transition-all duration-100 hover:bg-c3 active:bg-c1"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-green-400 shrink-0" />
-          <span className="font-mono text-xs text-zinc-400">{truncateAddress(address)}</span>
+          <span className="font-mono text-xs text-c7">{truncateAddress(address)}</span>
         </button>
       </div>
     );
@@ -43,7 +65,8 @@ function WalletButton({ className = '' }: WalletButtonProps) {
     <Button
       variant="primary"
       size="sm"
-      onClick={connectWallet}
+      onClick={handleConnect}
+      loading={connecting}
       className={className}
     >
       <Wallet className="w-4 h-4" />

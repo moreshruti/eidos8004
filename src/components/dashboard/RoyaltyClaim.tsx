@@ -2,58 +2,76 @@
 
 import { useState, useEffect } from 'react'
 import { useWeb3 } from '@/context/Web3Context'
-import { useRoyaltyDistribution } from '@/hooks/useRoyaltyDistribution'
-import { withTxToast } from '@/lib/tx-toast'
+import { useAttributionValidator } from '@/hooks/useAttributionValidator'
+import { withMockFallback } from '@/lib/mock-fallback'
+import { mockAttributions } from '@/lib/mock-data'
 
 export default function RoyaltyClaim() {
   const { address, isConnected } = useWeb3()
-  const { getRoyaltyBalance, claimRoyalties } = useRoyaltyDistribution()
-  const [balance, setBalance] = useState<string | null>(null)
+  const { getAttributionsByDesigner, totalDistributed } = useAttributionValidator()
+  const [totalEarned, setTotalEarned] = useState<string | null>(null)
+  const [attributionCount, setAttributionCount] = useState(0)
   const [fetching, setFetching] = useState(false)
-  const [claiming, setClaiming] = useState(false)
-  const [showConfirm, setShowConfirm] = useState(false)
 
   useEffect(() => {
     if (!isConnected || !address) {
-      setBalance(null)
+      setTotalEarned(null)
+      setAttributionCount(0)
       return
     }
 
     let cancelled = false
 
-    async function fetchBalance() {
+    async function fetchEarnings() {
       setFetching(true)
       try {
-        const result = await getRoyaltyBalance(address!)
-        if (!cancelled) setBalance(result)
+        const [attributions, distributed] = await Promise.all([
+          withMockFallback(
+            () => getAttributionsByDesigner(address!),
+            mockAttributions
+          ),
+          withMockFallback(() => totalDistributed(), '1.55'),
+        ])
+
+        if (!cancelled) {
+          const earned = attributions.reduce(
+            (sum, a) => sum + parseFloat(a.totalPaid),
+            0
+          )
+          setTotalEarned(earned.toFixed(4))
+          setAttributionCount(attributions.length)
+        }
       } catch {
-        if (!cancelled) setBalance(null)
+        if (!cancelled) {
+          setTotalEarned(null)
+          setAttributionCount(0)
+        }
       } finally {
         if (!cancelled) setFetching(false)
       }
     }
 
-    fetchBalance()
+    fetchEarnings()
 
     return () => {
       cancelled = true
     }
-  }, [isConnected, address, getRoyaltyBalance])
+  }, [isConnected, address, getAttributionsByDesigner, totalDistributed])
 
   if (!isConnected) {
     return (
       <p className="font-mono text-sm text-c5">
-        Connect wallet to view available royalties
+        Connect wallet to view earnings
       </p>
     )
   }
 
-  if (fetching || balance === null) {
+  if (fetching || totalEarned === null) {
     return (
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-c5">
-            Available Royalties
+            Total Earned
           </p>
           <div className="mt-1 h-8 w-32 animate-pulse bg-c3 rounded" />
         </div>
@@ -62,70 +80,24 @@ export default function RoyaltyClaim() {
     )
   }
 
-  const isEmpty = balance === '0' || balance === '0.0' || balance === '0.00'
-
-  async function handleClaim() {
-    setClaiming(true)
-    try {
-      await withTxToast(claimRoyalties(), {
-        pending: 'Claiming royalties...',
-        success: 'Royalties claimed',
-        error: 'Claim failed',
-      })
-      // Refresh balance after successful claim
-      if (address) {
-        const updated = await getRoyaltyBalance(address)
-        setBalance(updated)
-      }
-    } catch {
-      // Error handled by withTxToast
-    } finally {
-      setClaiming(false)
-    }
-  }
-
   return (
-    <>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-c5">
-            Available Royalties
-          </p>
-          <p className="text-2xl font-mono text-c12 tabular-nums mt-1">
-            {balance} <span className="text-sm text-c5">ETH</span>
-          </p>
-        </div>
-        <button
-          onClick={() => setShowConfirm(true)}
-          disabled={isEmpty || claiming}
-          className="bg-c12 text-c1 font-mono uppercase tracking-wider hover:bg-c11 px-6 py-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {claiming ? 'Claiming...' : 'Claim Royalties'}
-        </button>
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-c5">
+          Total Earned
+        </p>
+        <p className="text-2xl font-mono text-c12 tabular-nums mt-1">
+          {totalEarned} <span className="text-sm text-c5">ETH</span>
+        </p>
       </div>
-      {showConfirm && (
-        <div className="mt-4 border border-c3 bg-c2/50 p-4">
-          <p className="text-sm text-c9 font-mono mb-1">Confirm Claim</p>
-          <p className="text-xs text-c7 font-mono mb-4">
-            You are about to claim <span className="text-c12 font-medium">{balance} ETH</span> in royalties.
-            This will send a transaction to your wallet.
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={() => { setShowConfirm(false); handleClaim(); }}
-              className="bg-c12 text-c1 font-mono uppercase tracking-wider hover:bg-c11 px-4 py-2 text-xs transition-colors"
-            >
-              Confirm
-            </button>
-            <button
-              onClick={() => setShowConfirm(false)}
-              className="border border-c3 text-c7 hover:text-c12 hover:border-c5 font-mono uppercase tracking-wider px-4 py-2 text-xs transition-colors"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-    </>
+      <div className="text-right">
+        <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-c5">
+          Attributions
+        </p>
+        <p className="text-2xl font-mono text-c12 tabular-nums mt-1">
+          {attributionCount}
+        </p>
+      </div>
+    </div>
   )
 }

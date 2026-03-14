@@ -19,12 +19,12 @@ function NetworkBanner() {
     >
       <div className="mx-auto flex items-center justify-between gap-4 max-w-7xl">
         <p className="text-xs text-yellow-400/80">
-          Wrong network detected. Please switch to Polygon Amoy.
+          Wrong network detected. Please switch to a supported network.
         </p>
         <Button
           variant="secondary"
           size="sm"
-          onClick={switchNetwork}
+          onClick={() => switchNetwork()}
           className="shrink-0 border-yellow-500/20 text-yellow-400/80 hover:bg-yellow-500/10"
         >
           Switch Network

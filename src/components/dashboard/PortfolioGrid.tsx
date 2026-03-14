@@ -71,7 +71,7 @@ export default function PortfolioGrid() {
                 () => getAttributionsByDesign(design.tokenId),
                 mockAttributions.filter(a => a.designId === design.tokenId)
               )
-              const totalEarnings = attrs.reduce((sum, a) => sum + parseFloat(a.royaltyAmount), 0)
+              const totalEarnings = attrs.reduce((sum, a) => sum + parseFloat(a.totalPaid), 0)
               statsMap[design.tokenId] = { earnings: totalEarnings, attributionCount: attrs.length }
             } catch {
               statsMap[design.tokenId] = { earnings: 0, attributionCount: 0 }

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from 'react';
 import { ethers } from 'ethers';
-import { isSupportedChain, SUPPORTED_CHAINS } from '@/lib/network-config';
+import { isSupportedChain, SUPPORTED_CHAINS, type SupportedChainId } from '@/lib/network-config';
 
 interface Web3State {
   address: string | null;
@@ -17,7 +17,7 @@ interface Web3State {
 interface Web3ContextType extends Web3State {
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
-  switchNetwork: () => Promise<void>;
+  switchNetwork: (targetChainId?: SupportedChainId) => Promise<void>;
 }
 
 const initialState: Web3State = {
@@ -37,7 +37,7 @@ const Web3Context = createContext<Web3ContextType>({
   switchNetwork: async () => {},
 });
 
-const POLYGON_AMOY_CHAIN_ID = '0x13882'; // 80002
+const DEFAULT_CHAIN_ID: SupportedChainId = 84532; // Base Sepolia
 
 export function Web3Provider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<Web3State>(initialState);
@@ -51,32 +51,34 @@ export function Web3Provider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const switchNetwork = useCallback(async () => {
+  const switchNetwork = useCallback(async (targetChainId: SupportedChainId = DEFAULT_CHAIN_ID) => {
     if (typeof window === 'undefined' || !window.ethereum) {
       throw new Error('MetaMask is not installed');
     }
 
+    const hexChainId = `0x${targetChainId.toString(16)}`;
+
     try {
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: POLYGON_AMOY_CHAIN_ID }],
+        params: [{ chainId: hexChainId }],
       });
     } catch (switchError: unknown) {
       const err = switchError as { code?: number };
       // Chain not added to MetaMask — add it
       if (err.code === 4902) {
-        const amoyConfig = SUPPORTED_CHAINS[80002];
+        const chainConfig = SUPPORTED_CHAINS[targetChainId];
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
           params: [
             {
-              chainId: POLYGON_AMOY_CHAIN_ID,
-              chainName: amoyConfig.name,
-              rpcUrls: [amoyConfig.rpcUrl],
-              blockExplorerUrls: amoyConfig.blockExplorerUrl
-                ? [amoyConfig.blockExplorerUrl]
+              chainId: hexChainId,
+              chainName: chainConfig.name,
+              rpcUrls: [chainConfig.rpcUrl],
+              blockExplorerUrls: chainConfig.blockExplorerUrl
+                ? [chainConfig.blockExplorerUrl]
                 : undefined,
-              nativeCurrency: amoyConfig.nativeCurrency,
+              nativeCurrency: chainConfig.nativeCurrency,
             },
           ],
         });

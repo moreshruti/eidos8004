@@ -10,7 +10,6 @@ import { useDesignNFT } from '@/hooks/useDesignNFT'
 import { useAttributionValidator } from '@/hooks/useAttributionValidator'
 import { useAgentRegistry } from '@/hooks/useAgentRegistry'
 import { getIPFSUrl } from '@/lib/ipfs'
-import { Button } from '@/components/ui/Button'
 import type { DesignMetadata, Attribution } from '@/lib/types'
 
 function formatDate(timestamp: number): string {
@@ -19,19 +18,6 @@ function formatDate(timestamp: number): string {
     month: 'short',
     day: 'numeric',
   })
-}
-
-function formatUsageType(type: string): string {
-  switch (type) {
-    case 'inspiration':
-      return 'Inspiration'
-    case 'direct_usage':
-      return 'Direct Usage'
-    case 'training':
-      return 'AI Training'
-    default:
-      return type
-  }
 }
 
 function truncateAddress(address: string): string {
@@ -46,7 +32,7 @@ export default function DesignDetailPage() {
   const { isConnected } = useWeb3()
   const { getDesign } = useDesignNFT()
   const { getAttributionsByDesign } = useAttributionValidator()
-  const { getAgent } = useAgentRegistry()
+  const { getAgentByWallet } = useAgentRegistry()
 
   const [design, setDesign] = useState<DesignMetadata | null>(null)
   const [attributions, setAttributions] = useState<Attribution[]>([])
@@ -78,12 +64,12 @@ export default function DesignDetailPage() {
         setAttributions(sorted)
 
         // Resolve unique agent names
-        const uniqueAgents = Array.from(new Set(sorted.map((a) => a.agentAddress)))
+        const uniqueAgents = Array.from(new Set(sorted.map((a) => a.clientAgent)))
         const names = new Map<string, string>()
         await Promise.allSettled(
           uniqueAgents.map(async (addr) => {
             try {
-              const agent = await getAgent(addr)
+              const agent = await getAgentByWallet(addr)
               names.set(addr, agent.name)
             } catch {
               names.set(addr, truncateAddress(addr))
@@ -102,10 +88,10 @@ export default function DesignDetailPage() {
     return () => {
       cancelled = true
     }
-  }, [isConnected, tokenId, getDesign, getAttributionsByDesign, getAgent])
+  }, [isConnected, tokenId, getDesign, getAttributionsByDesign, getAgentByWallet])
 
   const totalEarnings = attributions.reduce(
-    (sum, a) => sum + parseFloat(ethers.formatEther(a.royaltyAmount)),
+    (sum, a) => sum + parseFloat(a.totalPaid),
     0
   )
 
@@ -208,7 +194,7 @@ export default function DesignDetailPage() {
             <div className="w-full md:w-80 h-64 border border-c2 shrink-0 overflow-hidden relative">
               {!imgError ? (
                 <Image
-                  src={getIPFSUrl(design.ipfsHash)}
+                  src={getIPFSUrl(design.ipfsCid)}
                   alt={design.title}
                   fill
                   className="object-cover"
@@ -245,8 +231,8 @@ export default function DesignDetailPage() {
               )}
 
               <div className="mt-4 space-y-1">
-                <p className="text-c5 font-mono uppercase tracking-[0.2em] text-[10px]">Creator</p>
-                <p className="font-mono text-sm text-c9">{truncateAddress(design.creator)}</p>
+                <p className="text-c5 font-mono uppercase tracking-[0.2em] text-[10px]">Artist</p>
+                <p className="font-mono text-sm text-c9">{truncateAddress(design.artist)}</p>
               </div>
 
               <div className="mt-3 space-y-1">
@@ -264,10 +250,10 @@ export default function DesignDetailPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-c2 border-x border-b border-c2">
             <div className="p-4">
               <p className="text-c5 font-mono uppercase tracking-[0.2em] text-[10px] mb-1">
-                Royalty Rate
+                Threshold Price
               </p>
               <p className="text-2xl font-semibold tracking-tight text-c11 tabular-nums">
-                {(design.baseRoyaltyBps / 100).toFixed(1)}%
+                {ethers.formatEther(design.thresholdPrice)} ETH
               </p>
             </div>
             <div className="p-4">
@@ -301,17 +287,6 @@ export default function DesignDetailPage() {
       {/* Section hatch */}
       <div className="section-hatch" />
 
-      {/* Edit button */}
-      <section className="border-t border-c2">
-        <div className="px-8 py-6">
-          <Link href={`/dashboard/portfolio/${tokenId}/edit`}>
-            <Button variant="secondary" size="md">
-              Edit Design
-            </Button>
-          </Link>
-        </div>
-      </section>
-
       {/* Attribution History */}
       <section className="border-t border-c2">
         <div className="px-8 pt-8 pb-10">
@@ -329,10 +304,10 @@ export default function DesignDetailPage() {
                         Agent
                       </th>
                       <th className="text-left text-c5 font-mono uppercase tracking-[0.2em] text-[10px] px-4 py-3">
-                        Usage Type
+                        Amount
                       </th>
                       <th className="text-left text-c5 font-mono uppercase tracking-[0.2em] text-[10px] px-4 py-3">
-                        Amount
+                        Artifacts
                       </th>
                       <th className="text-left text-c5 font-mono uppercase tracking-[0.2em] text-[10px] px-4 py-3">
                         Date
@@ -346,15 +321,13 @@ export default function DesignDetailPage() {
                         className="border-b border-c2 last:border-b-0 hover:bg-c2 transition-colors"
                       >
                         <td className="px-4 py-3 text-sm text-c9 font-mono">
-                          {agentNames.get(attr.agentAddress) ?? truncateAddress(attr.agentAddress)}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className="text-xs px-2 py-0.5 border border-c3 text-c7 font-mono">
-                            {formatUsageType(attr.usageType)}
-                          </span>
+                          {agentNames.get(attr.clientAgent) ?? truncateAddress(attr.clientAgent)}
                         </td>
                         <td className="px-4 py-3 text-sm text-c9 tabular-nums font-mono">
-                          {parseFloat(ethers.formatEther(attr.royaltyAmount)).toFixed(4)} ETH
+                          {parseFloat(attr.totalPaid).toFixed(4)} ETH
+                        </td>
+                        <td className="px-4 py-3 text-sm text-c9 tabular-nums font-mono">
+                          {attr.artifactIds.length}
                         </td>
                         <td className="px-4 py-3 text-sm text-c5 font-mono">
                           {formatDate(attr.timestamp)}

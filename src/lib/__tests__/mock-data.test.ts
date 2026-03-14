@@ -14,20 +14,21 @@ describe('mockDesigns', () => {
   test('each design has the required DesignMetadata fields with correct types', () => {
     for (const design of mockDesigns) {
       expect(typeof design.tokenId).toBe('number');
+      expect(typeof design.artist).toBe('string');
       expect(typeof design.title).toBe('string');
+      expect(typeof design.description).toBe('string');
       expect(typeof design.category).toBe('string');
+      expect(typeof design.ipfsCid).toBe('string');
       expect(Array.isArray(design.tags)).toBe(true);
-      expect(typeof design.baseRoyaltyBps).toBe('number');
-      expect(typeof design.isPublic).toBe('boolean');
-      expect(typeof design.ipfsHash).toBe('string');
-      expect(typeof design.creator).toBe('string');
+      expect(typeof design.thresholdPrice).toBe('bigint');
       expect(typeof design.createdAt).toBe('number');
+      expect(typeof design.isPublic).toBe('boolean');
     }
   });
 
-  test('every ipfsHash starts with "Qm"', () => {
+  test('every ipfsCid starts with "Qm"', () => {
     for (const design of mockDesigns) {
-      expect(design.ipfsHash.startsWith('Qm')).toBe(true);
+      expect(design.ipfsCid.startsWith('Qm')).toBe(true);
     }
   });
 
@@ -49,29 +50,29 @@ describe('mockAgents', () => {
 
   test('each agent has the required Agent fields with correct types', () => {
     for (const agent of mockAgents) {
-      expect(typeof agent.address).toBe('string');
+      expect(typeof agent.agentId).toBe('number');
+      expect(typeof agent.wallet).toBe('string');
+      expect(typeof agent.agentType).toBe('number');
       expect(typeof agent.name).toBe('string');
       expect(typeof agent.description).toBe('string');
-      expect(typeof agent.wallet).toBe('string');
-      expect(Array.isArray(agent.capabilities)).toBe(true);
-      expect(agent.capabilities.length).toBeGreaterThan(0);
-      expect(typeof agent.agentCardURI).toBe('string');
-      expect(typeof agent.trustScore).toBe('number');
-      expect(typeof agent.isActive).toBe('boolean');
+      expect(typeof agent.capabilitiesURI).toBe('string');
       expect(typeof agent.registeredAt).toBe('number');
+      expect(typeof agent.active).toBe('boolean');
     }
   });
 
-  test('trustScore is between 0 and 100 for every agent', () => {
+  test('reputationScore is between 0 and 100 for every agent that has one', () => {
     for (const agent of mockAgents) {
-      expect(agent.trustScore).toBeGreaterThanOrEqual(0);
-      expect(agent.trustScore).toBeLessThanOrEqual(100);
+      if (agent.reputationScore !== undefined) {
+        expect(agent.reputationScore).toBeGreaterThanOrEqual(0);
+        expect(agent.reputationScore).toBeLessThanOrEqual(100);
+      }
     }
   });
 
-  test('addresses are unique', () => {
-    const addrs = mockAgents.map((a) => a.address);
-    expect(new Set(addrs).size).toBe(addrs.length);
+  test('agentIds are unique', () => {
+    const ids = mockAgents.map((a) => a.agentId);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 });
 
@@ -88,19 +89,20 @@ describe('mockAttributions', () => {
   test('each attribution has the required Attribution fields with correct types', () => {
     for (const attr of mockAttributions) {
       expect(typeof attr.id).toBe('number');
-      expect(typeof attr.agentAddress).toBe('string');
-      expect(typeof attr.designerAddress).toBe('string');
       expect(typeof attr.designId).toBe('number');
-      expect(typeof attr.usageType).toBe('string');
-      expect(typeof attr.royaltyAmount).toBe('string');
+      expect(typeof attr.clientAgent).toBe('string');
+      expect(typeof attr.artistAgent).toBe('string');
+      expect(typeof attr.artist).toBe('string');
+      expect(Array.isArray(attr.artifactIds)).toBe(true);
+      expect(typeof attr.totalPaid).toBe('string');
+      expect(typeof attr.x402ProofHash).toBe('string');
       expect(typeof attr.timestamp).toBe('number');
     }
   });
 
-  test('usageType is one of the known values', () => {
-    const allowed = ['direct_usage', 'inspiration', 'training'];
+  test('x402ProofHash starts with 0x', () => {
     for (const attr of mockAttributions) {
-      expect(allowed).toContain(attr.usageType);
+      expect(attr.x402ProofHash.startsWith('0x')).toBe(true);
     }
   });
 

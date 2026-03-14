@@ -67,9 +67,9 @@ export default function AgentsPage() {
   }, [chainId])
 
   const totalAgentCount = agents.length
-  const avgTrustScore =
+  const avgReputationScore =
     totalAgentCount > 0
-      ? Math.round(agents.reduce((sum, a) => sum + a.trustScore, 0) / totalAgentCount)
+      ? Math.round(agents.reduce((sum, a) => sum + (a.reputationScore ?? 0), 0) / totalAgentCount)
       : 0
 
   return (
@@ -114,11 +114,11 @@ export default function AgentsPage() {
               </div>
               <div className="text-center py-8">
                 <p className="text-2xl font-semibold text-c12 tabular-nums tracking-tight font-mono">
-                  {avgTrustScore}
+                  {avgReputationScore}
                   <span className="text-lg text-c6">/100</span>
                 </p>
                 <p className="text-[10px] uppercase tracking-[0.2em] text-c6 font-mono">
-                  Avg Trust Score
+                  Avg Reputation
                 </p>
               </div>
               <div className="text-center py-8">

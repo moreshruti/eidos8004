@@ -7,12 +7,10 @@ import { WalletButton } from '@/components/ui/WalletButton';
 import { Footer } from '@/components/layout/Footer';
 import { MorphingIcon } from '@/components/ui/MorphingIcon';
 import { FlowPulse } from '@/components/ui/FlowPulse';
-import { playClick } from '@/lib/sounds';
 import { ProtocolStack } from '@/components/landing/ProtocolStack';
 import { useDesignNFT } from '@/hooks/useDesignNFT';
 import { useAgentRegistry } from '@/hooks/useAgentRegistry';
 import { useAttributionValidator } from '@/hooks/useAttributionValidator';
-import { useRoyaltyDistribution } from '@/hooks/useRoyaltyDistribution';
 import { withMockFallback } from '@/lib/mock-fallback';
 
 const FALLBACK_STATS = {
@@ -33,8 +31,7 @@ function formatCount(n: number): string {
 export default function Home() {
   const { totalDesigns } = useDesignNFT();
   const { totalAgents } = useAgentRegistry();
-  const { totalAttributions } = useAttributionValidator();
-  const { totalDistributed } = useRoyaltyDistribution();
+  const { totalAttributions, totalDistributed } = useAttributionValidator();
 
   const [statsLoading, setStatsLoading] = useState(true);
   const [stats, setStats] = useState([
@@ -75,6 +72,7 @@ export default function Home() {
     }
 
     fetchStats();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [totalDesigns, totalAgents, totalAttributions, totalDistributed]);
   return (
     <div className="min-h-screen bg-c1 relative overflow-x-hidden">

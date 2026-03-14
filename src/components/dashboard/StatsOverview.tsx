@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 import { useWeb3 } from '@/context/Web3Context'
 import { useDesignNFT } from '@/hooks/useDesignNFT'
 import { useAttributionValidator } from '@/hooks/useAttributionValidator'
-import { useRoyaltyDistribution } from '@/hooks/useRoyaltyDistribution'
 import { Skeleton } from '@/components/ui/Skeleton'
 import toast from 'react-hot-toast'
 import { withMockFallback } from '@/lib/mock-fallback'
@@ -20,8 +19,7 @@ interface Stats {
 export default function StatsOverview() {
   const { address, isConnected, chainId } = useWeb3()
   const { getDesignerPortfolio } = useDesignNFT()
-  const { getAttributionsByDesigner } = useAttributionValidator()
-  const { getRoyaltyBalance } = useRoyaltyDistribution()
+  const { getAttributionsByDesigner, totalDistributed } = useAttributionValidator()
   const [stats, setStats] = useState<Stats | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -39,10 +37,10 @@ export default function StatsOverview() {
         const [tokenIds, attributions, balance] = await Promise.all([
           withMockFallback(() => getDesignerPortfolio(address!), [1, 2, 3, 4, 5, 6, 7, 8]),
           withMockFallback(() => getAttributionsByDesigner(address!), mockAttributions),
-          withMockFallback(() => getRoyaltyBalance(address!), '1.55'),
+          withMockFallback(() => totalDistributed(), '1.55'),
         ])
 
-        const uniqueAgentSet = new Set(attributions.map((a) => a.agentAddress))
+        const uniqueAgentSet = new Set(attributions.map((a) => a.clientAgent))
 
         if (!cancelled) {
           setStats({
@@ -72,7 +70,7 @@ export default function StatsOverview() {
     return () => {
       cancelled = true
     }
-  }, [address, chainId, isConnected, getDesignerPortfolio, getAttributionsByDesigner, getRoyaltyBalance])
+  }, [address, chainId, isConnected, getDesignerPortfolio, getAttributionsByDesigner, totalDistributed])
 
   const statItems = [
     {

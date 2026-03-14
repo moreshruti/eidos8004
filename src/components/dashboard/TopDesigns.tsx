@@ -6,7 +6,6 @@ import { useDesignNFT } from '@/hooks/useDesignNFT'
 import { useAttributionValidator } from '@/hooks/useAttributionValidator'
 import { Skeleton } from '@/components/ui/Skeleton'
 import toast from 'react-hot-toast'
-import { ethers } from 'ethers'
 import type { DesignMetadata } from '@/lib/types'
 import { withMockFallback } from '@/lib/mock-fallback'
 import { mockDesigns, mockAttributions } from '@/lib/mock-data'
@@ -52,7 +51,7 @@ export default function TopDesigns() {
 
             const earnings = attributions.reduce(
               (sum, a) =>
-                sum + parseFloat(ethers.formatEther(a.royaltyAmount)),
+                sum + parseFloat(a.totalPaid),
               0
             )
 

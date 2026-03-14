@@ -1,7 +1,6 @@
 'use client';
 
 import { type ButtonHTMLAttributes, forwardRef } from 'react';
-import { playClick } from '@/lib/sounds';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
 type ButtonSize = 'sm' | 'md' | 'lg';
@@ -51,7 +50,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = 'primary', size = 'md', loading = false, className = '', onClick, children, disabled, ...props }, ref) => {
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
       if (!disabled && !loading) {
-        playClick();
         onClick?.(e);
       }
     };

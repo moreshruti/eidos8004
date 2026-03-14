@@ -7,28 +7,13 @@ import { useAttributionValidator } from '@/hooks/useAttributionValidator'
 import { useAgentRegistry } from '@/hooks/useAgentRegistry'
 import { Skeleton } from '@/components/ui/Skeleton'
 import toast from 'react-hot-toast'
-import { ethers } from 'ethers'
-import type { Attribution } from '@/lib/types'
 import { withMockFallback } from '@/lib/mock-fallback'
 import { mockAttributions, mockAgents } from '@/lib/mock-data'
-
-const usageTypeLabels: Record<string, string> = {
-  inspiration: 'Inspiration',
-  direct_usage: 'Direct Usage',
-  training: 'Training',
-}
-
-interface BreakdownItem {
-  type: string
-  label: string
-  count: number
-  percentage: number
-}
 
 interface TopAgent {
   name: string
   total: number
-  trustScore: number
+  reputationScore: number
 }
 
 interface GrowthData {
@@ -41,16 +26,14 @@ interface GrowthData {
 export default function AnalyticsView() {
   const { address, isConnected, chainId } = useWeb3()
   const { getAttributionsByDesigner } = useAttributionValidator()
-  const { getAgent } = useAgentRegistry()
+  const { getAgentByWallet } = useAgentRegistry()
 
-  const [breakdown, setBreakdown] = useState<BreakdownItem[]>([])
   const [topAgents, setTopAgents] = useState<TopAgent[]>([])
   const [growth, setGrowth] = useState<GrowthData | null>(null)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     if (!isConnected || !address) {
-      setBreakdown([])
       setTopAgents([])
       setGrowth(null)
       return
@@ -68,30 +51,13 @@ export default function AnalyticsView() {
 
         if (cancelled) return
 
-        // Attribution breakdown by type
-        const total = attributions.length
-        const byType = attributions.reduce(
-          (acc, a) => {
-            acc[a.usageType] = (acc[a.usageType] || 0) + 1
-            return acc
-          },
-          {} as Record<string, number>
-        )
-
-        const breakdownData = Object.entries(byType).map(([type, count]) => ({
-          type,
-          label: usageTypeLabels[type] || type,
-          count,
-          percentage: total > 0 ? Math.round((count / total) * 100) : 0,
-        }))
-
         // Top agents: aggregate earnings by agent, resolve names
         const agentTotals = new Map<string, number>()
         for (const a of attributions) {
-          const current = agentTotals.get(a.agentAddress) || 0
+          const current = agentTotals.get(a.clientAgent) || 0
           agentTotals.set(
-            a.agentAddress,
-            current + parseFloat(ethers.formatEther(a.royaltyAmount))
+            a.clientAgent,
+            current + parseFloat(a.totalPaid)
           )
         }
 
@@ -101,22 +67,22 @@ export default function AnalyticsView() {
 
         const topAgentsData: TopAgent[] = await Promise.all(
           agentEntries.map(async ([agentAddr, total]) => {
-            const mockAgent = mockAgents.find((a) => a.address === agentAddr)
+            const mockAgent = mockAgents.find((a) => a.wallet === agentAddr)
             const fallbackAgent = mockAgent || {
               name: `${agentAddr.slice(0, 6)}...${agentAddr.slice(-4)}`,
-              trustScore: 0,
+              reputationScore: 0,
             }
             try {
               const agent = await withMockFallback(
-                () => getAgent(agentAddr),
-                { ...mockAgents[0], address: agentAddr, ...fallbackAgent } as Awaited<ReturnType<typeof getAgent>>
+                () => getAgentByWallet(agentAddr),
+                { ...mockAgents[0], wallet: agentAddr, ...fallbackAgent } as Awaited<ReturnType<typeof getAgentByWallet>>
               )
-              return { name: agent.name, total, trustScore: agent.trustScore }
+              return { name: agent.name, total, reputationScore: agent.reputationScore ?? 0 }
             } catch {
               return {
                 name: fallbackAgent.name,
                 total,
-                trustScore: fallbackAgent.trustScore,
+                reputationScore: fallbackAgent.reputationScore ?? 0,
               }
             }
           })
@@ -127,7 +93,7 @@ export default function AnalyticsView() {
         for (const attr of attributions) {
           const date = new Date(attr.timestamp * 1000)
           const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
-          const amount = parseFloat(ethers.formatEther(attr.royaltyAmount))
+          const amount = parseFloat(attr.totalPaid)
           monthlyMap.set(monthKey, (monthlyMap.get(monthKey) || 0) + amount)
         }
 
@@ -149,7 +115,6 @@ export default function AnalyticsView() {
         }
 
         if (!cancelled) {
-          setBreakdown(breakdownData)
           setTopAgents(topAgentsData)
           setGrowth(growthData)
         }
@@ -167,7 +132,7 @@ export default function AnalyticsView() {
     return () => {
       cancelled = true
     }
-  }, [address, chainId, isConnected, getAttributionsByDesigner, getAgent])
+  }, [address, chainId, isConnected, getAttributionsByDesigner, getAgentByWallet])
 
   if (!isConnected) {
     return (
@@ -188,8 +153,8 @@ export default function AnalyticsView() {
           <Skeleton className="h-3 w-56 mb-6" />
           <Skeleton className="h-80 w-full" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {Array.from({ length: 2 }).map((_, i) => (
             <div key={i} className="border border-c2 p-6">
               <Skeleton className="h-5 w-32 mb-5" />
               <div className="space-y-4">
@@ -209,35 +174,8 @@ export default function AnalyticsView() {
       {/* Larger chart */}
       <EarningsChart height={320} />
 
-      {/* Three card row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Attribution by Type */}
-        <div className="border border-c2 p-6">
-          <h3 className="text-xs text-c7 uppercase tracking-wider font-medium font-mono mb-5">Attribution by Type</h3>
-          {breakdown.length > 0 ? (
-            <div className="space-y-4">
-              {breakdown.map((item) => (
-                <div key={item.type}>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-sm text-c8">{item.label}</span>
-                    <span className="text-sm font-semibold tracking-tight text-c12 font-mono tabular-nums">
-                      {item.percentage}%
-                    </span>
-                  </div>
-                  <div className="bg-c3 h-1.5 overflow-hidden">
-                    <div
-                      className="bg-c8 h-1.5 transition-all duration-500"
-                      style={{ width: `${item.percentage}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-c6">No attributions yet</p>
-          )}
-        </div>
-
+      {/* Two card row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Top Agents */}
         <div className="border border-c2 p-6">
           <h3 className="text-xs text-c7 uppercase tracking-wider font-medium font-mono mb-5">Top Agents</h3>
@@ -256,7 +194,7 @@ export default function AnalyticsView() {
                       {agent.name}
                     </p>
                     <p className="text-xs text-c7">
-                      Trust: {agent.trustScore}%
+                      Reputation: {agent.reputationScore}%
                     </p>
                   </div>
                   <span className="text-sm font-semibold tracking-tight text-c12 font-mono tabular-nums shrink-0">

@@ -183,6 +183,62 @@
     "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "designId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "artifactIndex",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "priceInWei",
+        "type": "uint256"
+      }
+    ],
+    "name": "ArtifactAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint256",
+        "name": "designId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "artifactIndex",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newPrice",
+        "type": "uint256"
+      }
+    ],
+    "name": "ArtifactUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
         "indexed": false,
         "internalType": "uint256",
         "name": "_fromTokenId",
@@ -210,7 +266,7 @@
       {
         "indexed": true,
         "internalType": "address",
-        "name": "creator",
+        "name": "artist",
         "type": "address"
       },
       {
@@ -222,24 +278,17 @@
       {
         "indexed": false,
         "internalType": "string",
-        "name": "ipfsHash",
+        "name": "ipfsCid",
         "type": "string"
-      }
-    ],
-    "name": "DesignMinted",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
+      },
       {
-        "indexed": true,
+        "indexed": false,
         "internalType": "uint256",
-        "name": "tokenId",
+        "name": "timestamp",
         "type": "uint256"
       }
     ],
-    "name": "DesignUpdated",
+    "name": "DesignMinted",
     "type": "event"
   },
   {
@@ -279,6 +328,25 @@
     "inputs": [
       {
         "indexed": true,
+        "internalType": "uint256",
+        "name": "designId",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newThreshold",
+        "type": "uint256"
+      }
+    ],
+    "name": "ThresholdPriceUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
         "internalType": "address",
         "name": "from",
         "type": "address"
@@ -302,6 +370,34 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_designId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_description",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_priceInWei",
+        "type": "uint256"
+      }
+    ],
+    "name": "addArtifact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "to",
         "type": "address"
@@ -315,6 +411,30 @@
     "name": "approve",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "artistDesigns",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -339,9 +459,33 @@
   {
     "inputs": [
       {
-        "internalType": "address",
+        "internalType": "uint256",
+        "name": "_designId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "_artifactIds",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "calculateArtifactsCost",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "totalCost",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "",
-        "type": "address"
+        "type": "uint256"
       },
       {
         "internalType": "uint256",
@@ -349,12 +493,27 @@
         "type": "uint256"
       }
     ],
-    "name": "designerPortfolio",
+    "name": "designArtifacts",
     "outputs": [
       {
+        "internalType": "string",
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "description",
+        "type": "string"
+      },
+      {
         "internalType": "uint256",
-        "name": "",
+        "name": "priceInWei",
         "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "active",
+        "type": "bool"
       }
     ],
     "stateMutability": "view",
@@ -371,8 +530,18 @@
     "name": "designs",
     "outputs": [
       {
+        "internalType": "address",
+        "name": "artist",
+        "type": "address"
+      },
+      {
         "internalType": "string",
         "name": "title",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "description",
         "type": "string"
       },
       {
@@ -381,29 +550,24 @@
         "type": "string"
       },
       {
+        "internalType": "string",
+        "name": "ipfsCid",
+        "type": "string"
+      },
+      {
         "internalType": "uint256",
-        "name": "baseRoyaltyBps",
+        "name": "thresholdPrice",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "createdAt",
         "type": "uint256"
       },
       {
         "internalType": "bool",
         "name": "isPublic",
         "type": "bool"
-      },
-      {
-        "internalType": "string",
-        "name": "ipfsHash",
-        "type": "string"
-      },
-      {
-        "internalType": "address",
-        "name": "creator",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "createdAt",
-        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -432,7 +596,45 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "tokenId",
+        "name": "_designId",
+        "type": "uint256"
+      }
+    ],
+    "name": "getArtifactCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_artist",
+        "type": "address"
+      }
+    ],
+    "name": "getArtistDesigns",
+    "outputs": [
+      {
+        "internalType": "uint256[]",
+        "name": "",
+        "type": "uint256[]"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_designId",
         "type": "uint256"
       }
     ],
@@ -441,13 +643,28 @@
       {
         "components": [
           {
+            "internalType": "address",
+            "name": "artist",
+            "type": "address"
+          },
+          {
             "internalType": "string",
             "name": "title",
             "type": "string"
           },
           {
             "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
             "name": "category",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "ipfsCid",
             "type": "string"
           },
           {
@@ -457,31 +674,21 @@
           },
           {
             "internalType": "uint256",
-            "name": "baseRoyaltyBps",
+            "name": "thresholdPrice",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "createdAt",
             "type": "uint256"
           },
           {
             "internalType": "bool",
             "name": "isPublic",
             "type": "bool"
-          },
-          {
-            "internalType": "string",
-            "name": "ipfsHash",
-            "type": "string"
-          },
-          {
-            "internalType": "address",
-            "name": "creator",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "createdAt",
-            "type": "uint256"
           }
         ],
-        "internalType": "struct DesignNFT.DesignMetadata",
+        "internalType": "struct DesignRegistry.Design",
         "name": "",
         "type": "tuple"
       }
@@ -492,17 +699,39 @@
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "designer",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "_designId",
+        "type": "uint256"
       }
     ],
-    "name": "getDesignerPortfolio",
+    "name": "getDesignArtifacts",
     "outputs": [
       {
-        "internalType": "uint256[]",
+        "components": [
+          {
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "internalType": "string",
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "priceInWei",
+            "type": "uint256"
+          },
+          {
+            "internalType": "bool",
+            "name": "active",
+            "type": "bool"
+          }
+        ],
+        "internalType": "struct DesignRegistry.Artifact[]",
         "name": "",
-        "type": "uint256[]"
+        "type": "tuple[]"
       }
     ],
     "stateMutability": "view",
@@ -536,37 +765,32 @@
     "inputs": [
       {
         "internalType": "string",
-        "name": "title",
+        "name": "_title",
         "type": "string"
       },
       {
         "internalType": "string",
-        "name": "category",
+        "name": "_description",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_category",
+        "type": "string"
+      },
+      {
+        "internalType": "string",
+        "name": "_ipfsCid",
         "type": "string"
       },
       {
         "internalType": "string[]",
-        "name": "tags",
+        "name": "_tags",
         "type": "string[]"
       },
       {
-        "internalType": "uint256",
-        "name": "baseRoyaltyBps",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "isPublic",
-        "type": "bool"
-      },
-      {
         "internalType": "string",
-        "name": "ipfsHash",
-        "type": "string"
-      },
-      {
-        "internalType": "string",
-        "name": "tokenURI_",
+        "name": "_tokenURI",
         "type": "string"
       }
     ],
@@ -738,6 +962,24 @@
     "inputs": [
       {
         "internalType": "uint256",
+        "name": "_designId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_artifactIndex",
+        "type": "uint256"
+      }
+    ],
+    "name": "toggleArtifact",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
         "name": "tokenId",
         "type": "uint256"
       }
@@ -806,26 +1048,21 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "tokenId",
+        "name": "_designId",
         "type": "uint256"
       },
       {
-        "internalType": "string",
-        "name": "title",
-        "type": "string"
+        "internalType": "uint256",
+        "name": "_artifactIndex",
+        "type": "uint256"
       },
       {
-        "internalType": "string",
-        "name": "category",
-        "type": "string"
-      },
-      {
-        "internalType": "bool",
-        "name": "isPublic",
-        "type": "bool"
+        "internalType": "uint256",
+        "name": "_newPrice",
+        "type": "uint256"
       }
     ],
-    "name": "updateDesignMetadata",
+    "name": "updateArtifactPrice",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

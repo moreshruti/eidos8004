@@ -17,7 +17,7 @@ export default function DesignCard({ design }: DesignCardProps) {
   const [earnings, setEarnings] = useState(0)
   const [imgError, setImgError] = useState(false)
 
-  const royaltyPercent = design.baseRoyaltyBps / 100
+  const formattedThreshold = ethers.formatEther(design.thresholdPrice)
 
   useEffect(() => {
     let cancelled = false
@@ -28,7 +28,7 @@ export default function DesignCard({ design }: DesignCardProps) {
         if (!cancelled) {
           setAttributionCount(attrs.length)
           const total = attrs.reduce(
-            (sum, a) => sum + parseFloat(ethers.formatEther(a.royaltyAmount)),
+            (sum, a) => sum + parseFloat(a.totalPaid),
             0
           )
           setEarnings(total)
@@ -47,9 +47,9 @@ export default function DesignCard({ design }: DesignCardProps) {
   return (
     <Link href={`/dashboard/portfolio/${design.tokenId}`} className="block">
       <div className="group bg-c2/50 border border-c2 overflow-hidden transition-colors duration-200 hover:bg-c2/80 cursor-pointer">
-        {design.ipfsHash && !imgError ? (
+        {design.ipfsCid && !imgError ? (
           <img
-            src={getIPFSUrl(design.ipfsHash)}
+            src={getIPFSUrl(design.ipfsCid)}
             alt={design.title}
             onError={() => setImgError(true)}
             className="h-36 w-full object-cover"
@@ -79,7 +79,7 @@ export default function DesignCard({ design }: DesignCardProps) {
           </div>
 
           <div className="flex items-center gap-3 text-xs text-c7 font-mono tabular-nums pt-3 border-t border-c2">
-            <span>{royaltyPercent}% royalty</span>
+            <span>{formattedThreshold} ETH threshold</span>
             <span className="w-px h-3 bg-c2" />
             <span>{attributionCount} attributions</span>
             <span className="w-px h-3 bg-c2" />

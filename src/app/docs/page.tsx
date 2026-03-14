@@ -101,20 +101,16 @@ export default function DocsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-c2">
           {[
             {
-              name: 'DesignNFT',
-              desc: 'ERC-721 for minting and managing design assets',
+              name: 'DesignRegistry',
+              desc: 'ERC-721 for minting and managing design assets with artifacts',
             },
             {
               name: 'AgentRegistry',
-              desc: 'Registration and trust scoring for AI agents',
+              desc: 'Registration and reputation scoring for AI agents',
             },
             {
-              name: 'AttributionValidator',
-              desc: 'Records and validates usage attributions',
-            },
-            {
-              name: 'RoyaltyDistribution',
-              desc: 'Handles royalty deposits and claims',
+              name: 'AttributionPayment',
+              desc: 'Records attributions and handles instant royalty payments',
             },
           ].map((contract) => (
             <div key={contract.name} className="bg-c1 p-6">
@@ -142,38 +138,37 @@ export default function DocsPage() {
         </h2>
         <div className="space-y-6">
           <div>
-            <p className="text-c9 font-medium text-sm mb-2">DesignNFT</p>
+            <p className="text-c9 font-medium text-sm mb-2">DesignRegistry</p>
             <div className="bg-c2 border border-c3 p-4 font-mono text-xs text-c9 overflow-x-auto">
-              <p>mintDesign(title, category, tags, royaltyBps, isPublic, ipfsHash, metadataURI)</p>
+              <p>mintDesign(title, description, category, ipfsCid, tags, tokenURI)</p>
               <p>getDesign(tokenId)</p>
-              <p>getDesignerPortfolio(address)</p>
-              <p>updateDesignMetadata(tokenId, title, category, isPublic)</p>
+              <p>getArtistDesigns(address)</p>
+              <p>addArtifact(designId, name, description, priceInWei)</p>
+              <p>getDesignArtifacts(designId)</p>
+              <p>calculateArtifactsCost(designId, artifactIds)</p>
             </div>
           </div>
           <div>
             <p className="text-c9 font-medium text-sm mb-2">AgentRegistry</p>
             <div className="bg-c2 border border-c3 p-4 font-mono text-xs text-c9 overflow-x-auto">
-              <p>registerAgent(name, capabilities, metadataURI)</p>
-              <p>getAgent(address)</p>
+              <p>registerAgent(agentType, name, description, capabilitiesURI, tokenURI)</p>
+              <p>getAgent(agentId)</p>
+              <p>getAgentByWallet(address)</p>
               <p>isRegisteredAgent(address)</p>
-              <p>getAllAgents()</p>
+              <p>totalAgents()</p>
+              <p>submitFeedback(agentId, score, tag, uri)</p>
+              <p>getReputationScore(agentId)</p>
             </div>
           </div>
           <div>
-            <p className="text-c9 font-medium text-sm mb-2">AttributionValidator</p>
+            <p className="text-c9 font-medium text-sm mb-2">AttributionPayment</p>
             <div className="bg-c2 border border-c3 p-4 font-mono text-xs text-c9 overflow-x-auto">
-              <p>validateAttribution(designId, agentAddress, usageType, context)</p>
-              <p>getAttributionsByDesign(designId)</p>
-              <p>getAttributionsByDesigner(address)</p>
-            </div>
-          </div>
-          <div>
-            <p className="text-c9 font-medium text-sm mb-2">RoyaltyDistribution</p>
-            <div className="bg-c2 border border-c3 p-4 font-mono text-xs text-c9 overflow-x-auto">
-              <p>depositRoyalty(designId)</p>
-              <p>claimRoyalties()</p>
-              <p>getRoyaltyBalance(address)</p>
-              <p>totalDistributed()</p>
+              <p>payForArtifacts(designId, artifactIds, x402ProofHash)</p>
+              <p>getAttribution(id)</p>
+              <p>getDesignAttributionHistory(designId)</p>
+              <p>getArtistAttributions(address)</p>
+              <p>getClientAttributions(address)</p>
+              <p>getStats()</p>
             </div>
           </div>
         </div>
@@ -194,21 +189,20 @@ export default function DocsPage() {
         </h2>
         <pre className="bg-c2 border border-c3 p-4 font-mono text-xs text-c9 overflow-x-auto">
 {`import { ethers } from 'ethers'
-import DesignNFT from './abis/DesignNFT.json'
+import DesignRegistry from './abis/DesignRegistry.json'
 
 const provider = new ethers.BrowserProvider(window.ethereum)
 const signer = await provider.getSigner()
-const contract = new ethers.Contract(DESIGN_NFT_ADDRESS, DesignNFT, signer)
+const contract = new ethers.Contract(DESIGN_REGISTRY_ADDRESS, DesignRegistry, signer)
 
 // Mint a design
 const tx = await contract.mintDesign(
   'My Design',
+  'A minimal dark-themed UI kit',
   'UI Design',
+  ipfsCid,
   ['minimal', 'dark'],
-  500,    // 5% royalty
-  true,   // public
-  ipfsHash,
-  metadataURI
+  tokenURI
 )
 await tx.wait()`}
         </pre>

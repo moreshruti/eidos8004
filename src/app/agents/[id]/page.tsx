@@ -64,7 +64,7 @@ export default function AgentDetailPage({
       setNotFound(false)
 
       try {
-        const fetchedAgent = await getAgent(id)
+        const fetchedAgent = await getAgent(Number(id))
 
         // Check if the agent is valid (has a name)
         if (!fetchedAgent.name) {
@@ -74,9 +74,9 @@ export default function AgentDetailPage({
 
         if (!cancelled) setAgent(fetchedAgent)
 
-        // Fetch attributions
+        // Fetch attributions using agent's wallet address
         try {
-          const fetchedAttrs = await getAttributionsByAgent(id)
+          const fetchedAttrs = await getAttributionsByAgent(fetchedAgent.wallet)
           if (!cancelled) {
             setAttributions(fetchedAttrs)
 

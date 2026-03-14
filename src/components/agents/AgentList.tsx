@@ -21,10 +21,12 @@ export default function AgentList({ agents }: AgentListProps) {
   const [sort, setSort] = useState<SortOption>('trust')
   const [page, setPage] = useState(1)
 
-  // Derive unique capabilities from the actual agents
+  // Derive unique capability URIs from the actual agents
   const capabilities = useMemo(() => {
     const caps = new Set<string>()
-    agents.forEach((agent) => agent.capabilities.forEach((c) => caps.add(c)))
+    agents.forEach((agent) => {
+      if (agent.capabilitiesURI) caps.add(agent.capabilitiesURI)
+    })
     return ['All Capabilities', ...Array.from(caps).sort()]
   }, [agents])
 
@@ -38,26 +40,26 @@ export default function AgentList({ agents }: AgentListProps) {
         (a) =>
           a.name.toLowerCase().includes(q) ||
           a.description.toLowerCase().includes(q) ||
-          a.capabilities.some((c) => c.toLowerCase().includes(q))
+          a.capabilitiesURI.toLowerCase().includes(q)
       )
     }
 
     // Capability filter
     if (capabilityFilter !== 'All Capabilities') {
-      result = result.filter((a) => a.capabilities.includes(capabilityFilter))
+      result = result.filter((a) => a.capabilitiesURI === capabilityFilter)
     }
 
     // Sort
     switch (sort) {
       case 'trust':
-        result = [...result].sort((a, b) => b.trustScore - a.trustScore)
+        result = [...result].sort((a, b) => (b.reputationScore ?? 0) - (a.reputationScore ?? 0))
         break
       case 'newest':
         result = [...result].sort((a, b) => b.registeredAt - a.registeredAt)
         break
       case 'active':
         result = [...result].sort(
-          (a, b) => (b.isActive ? 1 : 0) - (a.isActive ? 1 : 0)
+          (a, b) => (b.active ? 1 : 0) - (a.active ? 1 : 0)
         )
         break
     }
@@ -113,7 +115,7 @@ export default function AgentList({ agents }: AgentListProps) {
               onChange={(e) => setSort(e.target.value as SortOption)}
               className="appearance-none bg-c2 border border-c3 px-4 py-2.5 pr-10 text-sm text-c7 font-mono focus:outline-none focus:border-c5 transition-colors cursor-pointer"
             >
-              <option value="trust">Trust Score</option>
+              <option value="trust">Reputation</option>
               <option value="newest">Newest</option>
               <option value="active">Most Active</option>
             </select>
@@ -132,7 +134,7 @@ export default function AgentList({ agents }: AgentListProps) {
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-c2 border-t border-c2">
             {paginatedAgents.map((agent) => (
-              <AgentCard key={agent.address} agent={agent} />
+              <AgentCard key={agent.agentId} agent={agent} />
             ))}
           </div>
           <Pagination page={page} totalPages={totalPages} onPageChange={setPage} />

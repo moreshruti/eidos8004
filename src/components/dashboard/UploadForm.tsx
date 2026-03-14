@@ -50,10 +50,9 @@ export default function UploadForm() {
   const { mintDesign } = useDesignNFT()
 
   const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
   const [category, setCategory] = useState('')
   const [tags, setTags] = useState('')
-  const [royaltyRate, setRoyaltyRate] = useState(5)
-  const [isPublic, setIsPublic] = useState(true)
   const [file, setFile] = useState<File | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [mintStep, setMintStep] = useState<MintStep>('idle')
@@ -140,17 +139,15 @@ export default function UploadForm() {
         image: fileResult.url,
       })
 
-      // Step 3: Mint the design NFT (royalty percentage -> basis points)
+      // Step 3: Mint the design NFT
       setMintStep('minting')
-      const baseRoyaltyBps = Math.round(royaltyRate * 100)
 
       const mintPromise = mintDesign(
         title,
+        description,
         category,
-        parsedTags,
-        baseRoyaltyBps,
-        isPublic,
         fileResult.hash,
+        parsedTags,
         metadataResult.url,
       )
 
@@ -257,6 +254,24 @@ export default function UploadForm() {
           />
         </div>
 
+        {/* Description */}
+        <div className="space-y-2">
+          <label
+            htmlFor="description"
+            className="block text-xs font-mono font-medium text-c8 uppercase tracking-wider"
+          >
+            Description
+          </label>
+          <textarea
+            id="description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Describe your design"
+            rows={3}
+            className="w-full bg-c1 border border-c3 px-4 py-2.5 text-sm text-c12 placeholder:text-c6 focus:border-c5 focus:outline-none transition-colors resize-none"
+          />
+        </div>
+
         {/* Category */}
         <div className="space-y-2">
           <label
@@ -299,58 +314,6 @@ export default function UploadForm() {
             className="w-full bg-c1 border border-c3 px-4 py-2.5 text-sm text-c12 placeholder:text-c6 focus:border-c5 focus:outline-none transition-colors"
           />
           <p className="text-xs text-c7">Comma separated</p>
-        </div>
-
-        {/* Royalty Rate */}
-        <div className="space-y-2">
-          <label className="block text-xs font-mono font-medium text-c8 uppercase tracking-wider">
-            Royalty Rate
-          </label>
-          <div className="flex items-center gap-4">
-            <input
-              type="range"
-              min={0}
-              max={10}
-              step={0.5}
-              value={royaltyRate}
-              onChange={(e) => setRoyaltyRate(parseFloat(e.target.value))}
-              className="flex-1 h-1 bg-c3 appearance-none cursor-pointer accent-white"
-            />
-            <span className="text-sm font-medium text-c12 tabular-nums w-12 text-right">
-              {royaltyRate}%
-            </span>
-          </div>
-        </div>
-
-        {/* Visibility */}
-        <div className="space-y-2">
-          <label className="block text-xs font-mono font-medium text-c8 uppercase tracking-wider">
-            Visibility
-          </label>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setIsPublic(true)}
-              className={`flex-1 py-2 text-sm font-medium transition-colors ${
-                isPublic
-                  ? 'bg-c2 border border-c5 text-c12'
-                  : 'border border-c3 text-c7 hover:text-c9 hover:border-c5'
-              }`}
-            >
-              Public
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsPublic(false)}
-              className={`flex-1 py-2 text-sm font-medium transition-colors ${
-                !isPublic
-                  ? 'bg-c2 border border-c5 text-c12'
-                  : 'border border-c3 text-c7 hover:text-c9 hover:border-c5'
-              }`}
-            >
-              Private
-            </button>
-          </div>
         </div>
 
         {/* Submit */}
