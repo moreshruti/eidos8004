@@ -8,13 +8,14 @@ import {
   Upload,
   Grid3X3,
   BarChart3,
+  Bot,
+  FileText,
   Menu,
   X,
   PanelLeftClose,
   PanelLeftOpen,
 } from 'lucide-react'
 import { NetworkBanner } from '@/components/ui/NetworkBanner'
-import { WalletGate } from '@/components/ui/WalletGate'
 import { MockModeBanner } from '@/components/ui/MockModeBanner'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
 import { MockModeProvider } from '@/context/MockModeContext'
@@ -25,6 +26,8 @@ const navItems = [
   { label: 'Upload', href: '/dashboard/upload', icon: Upload },
   { label: 'Portfolio', href: '/dashboard/portfolio', icon: Grid3X3 },
   { label: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
+  { label: 'Agents', href: '/agents', icon: Bot },
+  { label: 'Docs', href: '/docs', icon: FileText },
 ]
 
 export default function DashboardLayout({
@@ -163,11 +166,9 @@ export default function DashboardLayout({
           {/* Page content */}
           <main className="flex-1 p-6 md:p-8 lg:p-10 overflow-y-auto">
             <MockModeProvider>
-              <WalletGate message="Connect your wallet to access the dashboard">
-                <ErrorBoundary>
-                  {children}
-                </ErrorBoundary>
-              </WalletGate>
+              <ErrorBoundary>
+                {children}
+              </ErrorBoundary>
             </MockModeProvider>
           </main>
         </div>

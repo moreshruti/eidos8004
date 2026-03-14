@@ -27,7 +27,7 @@ export default function AgentsPage() {
 
   const [agents, setAgents] = useState<Agent[]>([])
   const [attrCount, setAttrCount] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
