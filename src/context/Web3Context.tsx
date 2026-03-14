@@ -89,18 +89,8 @@ export function Web3Provider({ children }: { children: ReactNode }) {
   }, []);
 
   const connectWallet = useCallback(async () => {
-    // If no wallet extension, use mock demo wallet
     if (typeof window === 'undefined' || !window.ethereum) {
-      setState({
-        address: '0x742d35Cc6634C0532925a3b844Bc9e7595f2bD18',
-        chainId: DEFAULT_CHAIN_ID,
-        balance: '1.250',
-        isConnected: true,
-        isCorrectNetwork: true,
-        provider: null,
-        signer: null,
-      });
-      return;
+      throw new Error('No wallet detected');
     }
 
     try {
