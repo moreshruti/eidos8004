@@ -27,8 +27,7 @@ function WalletButton({ className = '' }: WalletButtonProps) {
 
   const handleConnect = async () => {
     if (typeof window !== 'undefined' && !window.ethereum) {
-      toast.error('No wallet detected. Install MetaMask to continue.');
-      window.open('https://metamask.io/download/', '_blank');
+      toast.error('No wallet detected. Install a browser wallet to connect.');
       return;
     }
     setConnecting(true);
