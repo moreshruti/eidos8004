@@ -10,6 +10,8 @@ import {
   BarChart3,
   Menu,
   X,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react'
 import { NetworkBanner } from '@/components/ui/NetworkBanner'
 import { WalletGate } from '@/components/ui/WalletGate'
@@ -32,6 +34,7 @@ export default function DashboardLayout({
 }) {
   const pathname = usePathname()
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(false)
   const { address, isConnected } = useWeb3()
 
   function isActive(href: string) {
@@ -60,20 +63,34 @@ export default function DashboardLayout({
 
         {/* Sidebar */}
         <aside
-          className={`fixed inset-y-0 left-0 z-50 w-56 bg-c1 border-r border-c2 flex flex-col transition-transform duration-200 lg:translate-x-0 lg:static ${
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
+          className={`fixed inset-y-0 left-0 z-50 bg-c1 border-r border-c2 flex flex-col transition-all duration-200 lg:translate-x-0 lg:static ${
+            collapsed ? 'w-[72px]' : 'w-56'
+          } ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
-          {/* Logo */}
-          <div className="h-14 flex items-center px-5 border-b border-c2 shrink-0">
-            <Link href="/" className="flex items-center gap-0.5">
-              <span className="text-sm font-semibold font-pixel text-c12 tracking-tight">
-                Eidos
-              </span>
-              <span className="text-sm font-normal text-c7">
-                8004
-              </span>
-            </Link>
+          {/* Logo + collapse toggle */}
+          <div className="h-14 flex items-center border-b border-c2 shrink-0 px-3">
+            {!collapsed && (
+              <Link href="/" className="flex items-center gap-0.5 ml-2">
+                <span className="text-sm font-semibold font-pixel text-c12 tracking-tight">
+                  Eidos
+                </span>
+                <span className="text-sm font-normal text-c7">
+                  8004
+                </span>
+              </Link>
+            )}
+            {/* Desktop collapse toggle */}
+            <button
+              onClick={() => setCollapsed(!collapsed)}
+              className={`hidden lg:flex p-2 text-c6 hover:text-c12 hover:bg-c2 transition-colors ${collapsed ? 'mx-auto' : 'ml-auto'}`}
+              title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {collapsed ? (
+                <PanelLeftOpen className="h-5 w-5" />
+              ) : (
+                <PanelLeftClose className="h-5 w-5" />
+              )}
+            </button>
             {/* Mobile close */}
             <button
               onClick={() => setSidebarOpen(false)}
@@ -84,7 +101,7 @@ export default function DashboardLayout({
           </div>
 
           {/* Nav */}
-          <nav className="flex-1 px-3 py-4 space-y-0.5">
+          <nav className={`flex-1 py-4 ${collapsed ? 'px-3 space-y-2' : 'px-3 space-y-0.5'}`}>
             {navItems.map((item) => {
               const Icon = item.icon
               const active = isActive(item.href)
@@ -93,33 +110,36 @@ export default function DashboardLayout({
                   key={item.href}
                   href={item.href}
                   onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-2 text-sm transition-colors ${
-                    active
-                      ? 'text-c12 border-l-2 border-c11 bg-c2'
-                      : 'text-c6 hover:text-c12 hover:bg-c2'
+                  title={collapsed ? item.label : undefined}
+                  className={`flex items-center transition-colors ${
+                    collapsed
+                      ? `justify-center w-11 h-11 mx-auto ${active ? 'text-c12 bg-c2 border border-c5' : 'text-c7 hover:text-c12 hover:bg-c2'}`
+                      : `gap-3 px-3 py-2 text-sm ${active ? 'text-c12 border-l-2 border-c11 bg-c2' : 'text-c6 hover:text-c12 hover:bg-c2'}`
                   }`}
                 >
-                  <Icon className="h-4 w-4 shrink-0" />
-                  <span className="font-mono">{item.label}</span>
+                  <Icon className={collapsed ? 'h-5 w-5' : 'h-4 w-4 shrink-0'} />
+                  {!collapsed && <span className="font-mono">{item.label}</span>}
                 </Link>
               )
             })}
           </nav>
 
           {/* Bottom section */}
-          <div className="px-3 pb-4 border-t border-c2 pt-4 shrink-0">
-            <div className="flex items-center gap-3 px-3 py-2">
-              <div className="w-8 h-8 bg-c3 border border-c3 flex items-center justify-center shrink-0">
-                <span className="text-xs font-medium text-c8">{avatarLetter}</span>
+          <div className={`pb-4 border-t border-c2 pt-4 shrink-0 ${collapsed ? 'px-3' : 'px-3'}`}>
+            <div className={`flex items-center ${collapsed ? 'justify-center py-2' : 'gap-3 px-3 py-2'}`}>
+              <div className={`bg-c3 border border-c3 flex items-center justify-center shrink-0 ${collapsed ? 'w-10 h-10 mx-auto' : 'w-8 h-8'}`}>
+                <span className={`font-medium text-c8 ${collapsed ? 'text-sm' : 'text-xs'}`}>{avatarLetter}</span>
               </div>
-              <div className="min-w-0">
-                <p className="text-sm font-mono text-c9 truncate tabular-nums">
-                  {displayAddress}
-                </p>
-                <p className="text-xs text-c5">
-                  {isConnected ? 'Connected' : 'Not connected'}
-                </p>
-              </div>
+              {!collapsed && (
+                <div className="min-w-0">
+                  <p className="text-sm font-mono text-c9 truncate tabular-nums">
+                    {displayAddress}
+                  </p>
+                  <p className="text-xs text-c5">
+                    {isConnected ? 'Connected' : 'Not connected'}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </aside>
