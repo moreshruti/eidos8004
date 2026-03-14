@@ -9,7 +9,6 @@ import {
   Grid3X3,
   BarChart3,
   Bot,
-  FileText,
   Menu,
   X,
   PanelLeftClose,
@@ -26,8 +25,7 @@ const navItems = [
   { label: 'Upload', href: '/dashboard/upload', icon: Upload },
   { label: 'Portfolio', href: '/dashboard/portfolio', icon: Grid3X3 },
   { label: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
-  { label: 'Agents', href: '/agents', icon: Bot },
-  { label: 'Docs', href: '/docs', icon: FileText },
+  { label: 'Agents', href: '/dashboard/agents', icon: Bot },
 ]
 
 export default function DashboardLayout({

@@ -23,7 +23,9 @@ export default function DocsLayout({
 
       {/* Content column */}
       <div className="max-w-[960px] mx-auto px-6 pt-14">
-        {children}
+        <div className="px-8">
+          {children}
+        </div>
       </div>
 
       <Footer />

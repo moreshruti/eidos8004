@@ -147,7 +147,7 @@ export default function AgentList({ agents }: AgentListProps) {
             </svg>
           </div>
           <p className="text-sm text-c7 mb-4">No agents registered yet</p>
-          <Link href="/agents/register" className="inline-block bg-c12 text-c1 font-mono uppercase tracking-wider hover:bg-c11 px-6 py-2 text-xs transition-colors">
+          <Link href="/dashboard/agents/register" className="inline-block bg-c12 text-c1 font-mono uppercase tracking-wider hover:bg-c11 px-6 py-2 text-xs transition-colors">
             Register First Agent
           </Link>
         </div>

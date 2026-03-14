@@ -9,7 +9,6 @@ import { WalletButton } from '@/components/ui/WalletButton';
 const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/dashboard', label: 'Dashboard' },
-  { href: '/agents', label: 'Agents' },
   { href: '/docs', label: 'Docs' },
 ];
 

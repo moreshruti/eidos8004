@@ -116,7 +116,7 @@ export default function AgentDetailPage({
     <div>
       {/* Back Button */}
       <Link
-        href="/agents"
+        href="/dashboard/agents"
         className="inline-flex items-center gap-1.5 text-sm text-c5 hover:text-c11 transition-colors mb-6"
       >
         <ArrowLeft className="w-4 h-4" />
@@ -149,7 +149,7 @@ export default function AgentDetailPage({
             The agent you are looking for does not exist or has been removed.
           </p>
           <Link
-            href="/agents"
+            href="/dashboard/agents"
             className="text-c7 hover:text-c11 text-sm transition-colors"
           >
             Return to Agent Registry

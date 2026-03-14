@@ -10,47 +10,35 @@ export default function DashboardPage() {
   return (
     <div>
       {/* Header */}
-      <section className="border-t border-c2 flow-line">
-        <div className="px-8 pt-10 pb-8">
-          <h1 className="text-2xl font-pixel uppercase tracking-tight text-c11">Dashboard</h1>
-          <p className="font-mono text-c5 text-sm mt-1">Welcome back, designer</p>
-        </div>
-      </section>
+      <div className="mb-6">
+        <h1 className="text-2xl font-pixel uppercase tracking-tight text-c11">Dashboard</h1>
+        <p className="font-mono text-c5 text-sm mt-1">Welcome back, designer</p>
+      </div>
 
       {/* Stats */}
-      <section className="border-t border-c2 flow-line">
-        <div className="px-8 pt-10 pb-8">
-          <StatsOverview />
-        </div>
-      </section>
+      <div className="border border-c2">
+        <StatsOverview />
+      </div>
 
       {/* Royalty Claim */}
-      <section className="border-t border-c2 flow-line">
-        <div className="px-8 pt-10 pb-8">
-          <RoyaltyClaim />
-        </div>
-      </section>
+      <div className="mt-6">
+        <RoyaltyClaim />
+      </div>
 
       {/* Chart + Attributions */}
-      <section className="border-t border-c2 flow-line">
-        <div className="px-8 pt-10 pb-8">
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            <div className="xl:col-span-2">
-              <EarningsChart />
-            </div>
-            <div className="xl:col-span-1">
-              <RecentAttributions />
-            </div>
-          </div>
+      <div className="mt-6 grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-2">
+          <EarningsChart />
         </div>
-      </section>
+        <div className="xl:col-span-1">
+          <RecentAttributions />
+        </div>
+      </div>
 
       {/* Top Designs */}
-      <section className="border-t border-c2 flow-line">
-        <div className="px-8 pt-10 pb-8">
-          <TopDesigns />
-        </div>
-      </section>
+      <div className="mt-6">
+        <TopDesigns />
+      </div>
     </div>
   )
 }

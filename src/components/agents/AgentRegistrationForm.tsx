@@ -95,7 +95,7 @@ export default function AgentRegistrationForm() {
         <p className="text-sm text-c7 font-mono mb-6">Your agent is now on-chain and ready to attribute designs.</p>
         <div className="flex justify-center gap-3">
           <button
-            onClick={() => router.push('/agents')}
+            onClick={() => router.push('/dashboard/agents')}
             className="bg-c12 text-c1 font-mono uppercase tracking-wider hover:bg-c11 px-6 py-2 text-xs transition-colors"
           >
             View Agent Registry

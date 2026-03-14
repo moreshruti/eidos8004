@@ -42,7 +42,7 @@ export default function AgentCard({ agent }: AgentCardProps) {
   )
 
   return (
-    <Link href={`/agents/${agent.agentId}`}>
+    <Link href={`/dashboard/agents/${agent.agentId}`}>
       <div className="group bg-c1 p-5 hover:bg-c2 transition-colors duration-150 cursor-pointer h-full flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between mb-4">

@@ -75,26 +75,20 @@ export default function AgentsPage() {
   return (
     <div>
       {/* Header */}
-      <section className="border-t border-c2 flow-line">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-c5 font-mono mb-4">Agent Registry</p>
-            <h1 className="text-2xl font-pixel uppercase tracking-tight text-c11">AI Agent Registry</h1>
-            <p className="text-sm text-c7 font-mono mt-1">
-              Verified AI agents using EIP-8004 identity standard
-            </p>
-          </div>
-          <Link href="/agents/register">
-            <Button variant="primary">Register Your Agent</Button>
-          </Link>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-pixel uppercase tracking-tight text-c11">AI Agent Registry</h1>
+          <p className="text-sm text-c7 font-mono mt-1">
+            Verified AI agents using EIP-8004 identity standard
+          </p>
         </div>
-      </section>
-
-      {/* Hatch */}
-      <div className="border-t border-c2 overflow-hidden"><div className="section-hatch" /></div>
+        <Link href="/dashboard/agents/register">
+          <Button variant="primary">Register Your Agent</Button>
+        </Link>
+      </div>
 
       {/* Stats Row */}
-      <section className="border-t border-c2 flow-line">
+      <section className="border border-c2">
         <div className="grid grid-cols-3 sm:divide-x sm:divide-c2">
           {loading ? (
             <>
@@ -151,12 +145,9 @@ export default function AgentsPage() {
         </div>
       )}
 
-      {/* Hatch */}
-      <div className="border-t border-c2 overflow-hidden"><div className="section-hatch" /></div>
-
       {/* Agent List */}
       {loading ? (
-        <section className="border-t border-c2 flow-line">
+        <section className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-c2">
             {Array.from({ length: 6 }).map((_, i) => (
               <div

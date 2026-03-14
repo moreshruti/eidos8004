@@ -12,7 +12,7 @@ export default function DocsPage() {
       </section>
 
       {/* Hatch */}
-      <div className="border-t border-c2 overflow-hidden">
+      <div className="-mx-8 border-t border-c2 overflow-hidden">
         <div className="section-hatch" />
       </div>
 
@@ -39,7 +39,7 @@ export default function DocsPage() {
       </section>
 
       {/* Hatch */}
-      <div className="border-t border-c2 overflow-hidden">
+      <div className="-mx-8 border-t border-c2 overflow-hidden">
         <div className="section-hatch" />
       </div>
 
@@ -86,7 +86,7 @@ export default function DocsPage() {
       </section>
 
       {/* Hatch */}
-      <div className="border-t border-c2 overflow-hidden">
+      <div className="-mx-8 border-t border-c2 overflow-hidden">
         <div className="section-hatch" />
       </div>
 
@@ -124,7 +124,7 @@ export default function DocsPage() {
       </section>
 
       {/* Hatch */}
-      <div className="border-t border-c2 overflow-hidden">
+      <div className="-mx-8 border-t border-c2 overflow-hidden">
         <div className="section-hatch" />
       </div>
 
@@ -175,7 +175,7 @@ export default function DocsPage() {
       </section>
 
       {/* Hatch */}
-      <div className="border-t border-c2 overflow-hidden">
+      <div className="-mx-8 border-t border-c2 overflow-hidden">
         <div className="section-hatch" />
       </div>
 
@@ -209,7 +209,7 @@ await tx.wait()`}
       </section>
 
       {/* Hatch */}
-      <div className="border-t border-c2 overflow-hidden">
+      <div className="-mx-8 border-t border-c2 overflow-hidden">
         <div className="section-hatch" />
       </div>
 
@@ -269,7 +269,7 @@ await tx.wait()`}
       </section>
 
       {/* Final hatch */}
-      <div className="border-t border-c2 overflow-hidden">
+      <div className="-mx-8 border-t border-c2 overflow-hidden">
         <div className="section-hatch" />
       </div>
     </div>
