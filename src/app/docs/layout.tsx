@@ -22,7 +22,7 @@ export default function DocsLayout({
       </div>
 
       {/* Content column */}
-      <div className="max-w-[960px] mx-auto px-6">
+      <div className="max-w-[960px] mx-auto px-6 pt-14">
         {children}
       </div>
 
