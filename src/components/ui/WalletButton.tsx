@@ -26,10 +26,6 @@ function WalletButton({ className = '' }: WalletButtonProps) {
   const [connecting, setConnecting] = useState(false);
 
   const handleConnect = async () => {
-    if (typeof window !== 'undefined' && !window.ethereum) {
-      toast.error('No wallet detected. Install a browser wallet to connect.');
-      return;
-    }
     setConnecting(true);
     try {
       await connectWallet();
